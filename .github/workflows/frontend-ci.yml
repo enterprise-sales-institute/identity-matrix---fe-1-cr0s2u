@@ -1,0 +1,102 @@
+name: Frontend CI
+
+# Trigger workflow on push and pull requests to main/develop branches
+# Only when changes are made to frontend code
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/web/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/web/**'
+
+# Environment variables available to all jobs and steps
+env:
+  NODE_VERSION: '18.x'
+  WORKING_DIRECTORY: 'src/web'
+
+jobs:
+  validate:
+    name: Build, Test & Validate
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Setup Node.js environment
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/web/package-lock.json'
+
+      # Install dependencies
+      - name: Install Dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      # Type checking with TypeScript
+      - name: Type Check
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run typecheck
+        
+      # Lint check
+      - name: Lint Check
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run lint
+        
+      # Run tests with coverage
+      - name: Run Tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run test
+        env:
+          CI: true
+
+      # Upload test coverage as artifact
+      - name: Upload Test Coverage
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: ${{ env.WORKING_DIRECTORY }}/coverage
+          retention-days: 14
+
+      # Build application
+      - name: Build Application
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run build
+        env:
+          CI: true
+
+      # Upload build artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: ${{ env.WORKING_DIRECTORY }}/dist
+          retention-days: 14
+
+      # Report job status
+      - name: Report Status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { job, conclusion } = context;
+            const status = conclusion === 'success' ? '✅' : '❌';
+            const message = `${status} Frontend CI: ${conclusion}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
