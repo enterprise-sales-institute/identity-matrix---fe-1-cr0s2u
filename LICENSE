@@ -1,0 +1,102 @@
+IDENTITY MATRIX SOFTWARE LICENSE AGREEMENT
+Version 1.0 - 2024
+
+IMPORTANT: READ THIS LICENSE AGREEMENT CAREFULLY BEFORE USING THE SOFTWARE
+
+1. COPYRIGHT NOTICE
+© 2024 Identity Matrix. All rights reserved.
+This software and associated documentation files (the "Software") are protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties.
+
+2. DEFINITIONS
+"Software" refers to the Identity Matrix platform, including all components, updates, and documentation.
+"Licensee" refers to the legal entity that has purchased a license to use the Software.
+"User" refers to individual employees or contractors of the Licensee authorized to use the Software.
+"PII" refers to Personally Identifiable Information processed by the Software.
+"CRM Integration" refers to connections between the Software and third-party Customer Relationship Management systems.
+
+3. GRANT OF LICENSE
+Subject to the terms of this Agreement and payment of applicable fees, Identity Matrix grants Licensee a non-exclusive, non-transferable license to:
+a) Install and use the Software for business purposes
+b) Create and maintain CRM integrations as permitted by subscription tier
+c) Process visitor data in accordance with applicable privacy laws
+d) Access and utilize the Software's API within documented limits
+
+4. USAGE RESTRICTIONS
+Licensee shall not:
+a) Modify, reverse engineer, decompile, or disassemble the Software
+b) Remove or alter any proprietary notices or marks
+c) Transfer, sublicense, lease, or resell the Software
+d) Use the Software to develop competing products
+e) Exceed authorized usage limits or API quotas
+f) Circumvent any security measures or access controls
+
+5. DATA PRIVACY COMPLIANCE
+Licensee shall:
+a) Comply with GDPR, CCPA, and applicable privacy regulations
+b) Obtain necessary consents for visitor tracking and data collection
+c) Implement appropriate data protection measures
+d) Process PII only as permitted by applicable laws
+e) Maintain records of data processing activities
+f) Report data breaches as required by law
+
+6. INTEGRATION TERMS
+For CRM and third-party integrations:
+a) Licensee must comply with third-party terms of service
+b) Identity Matrix is not liable for third-party service disruptions
+c) Data sharing must comply with privacy regulations
+d) API usage must follow documented rate limits
+e) Secure credential storage is required
+
+7. WARRANTIES AND DISCLAIMERS
+Identity Matrix warrants that:
+a) The Software will perform substantially as documented
+b) Services will be provided with reasonable skill and care
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY OTHER WARRANTIES. IDENTITY MATRIX DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED.
+
+8. LIABILITY LIMITATIONS
+a) Identity Matrix's total liability shall not exceed fees paid in the previous 12 months
+b) Neither party shall be liable for indirect, consequential, or incidental damages
+c) Data loss liability is limited to reasonable recovery efforts
+d) Force majeure events exclude liability
+
+9. TERM AND TERMINATION
+a) This license remains effective until terminated
+b) Identity Matrix may terminate upon breach of terms
+c) Licensee must cease use upon termination
+d) Sections 1, 4, 5, 8, and 10 survive termination
+e) Data export is permitted during 30-day termination period
+
+10. GOVERNING LAW
+a) This Agreement is governed by the laws of [Jurisdiction]
+b) Disputes shall be resolved in courts of [Jurisdiction]
+c) Each party consents to exclusive jurisdiction of such courts
+
+11. COMPLIANCE VERIFICATION
+Identity Matrix reserves the right to:
+a) Audit compliance with license terms
+b) Request certification of compliance
+c) Verify usage within authorized limits
+
+12. SUPPORT AND MAINTENANCE
+a) Support provided per subscription tier
+b) Updates and maintenance included in subscription
+c) Professional services available separately
+
+13. CONFIDENTIALITY
+Licensee shall:
+a) Protect confidential information
+b) Limit access to authorized personnel
+c) Return or destroy confidential information upon termination
+
+14. ASSIGNMENT
+This Agreement may not be assigned without prior written consent of Identity Matrix.
+
+15. ENTIRE AGREEMENT
+This Agreement constitutes the entire agreement regarding the Software and supersedes all prior agreements.
+
+By using the Software, Licensee agrees to be bound by the terms of this Agreement.
+
+For questions about this license, contact:
+Identity Matrix Legal Department
+[Contact Information]
