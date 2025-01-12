@@ -1,0 +1,128 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/backend/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/backend/**'
+
+env:
+  NODE_VERSION: '18.x'
+  WORKING_DIRECTORY: 'src/backend'
+  MIN_COVERAGE: '80'
+
+# Prevent concurrent workflow runs to avoid race conditions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        timeout-minutes: 5
+
+      - name: Security audit
+        run: npm audit
+        continue-on-error: false
+
+      - name: Run linting
+        run: npm run lint
+        timeout-minutes: 2
+
+      - name: Run type checking
+        run: npm run typecheck
+        timeout-minutes: 2
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+        timeout-minutes: 3
+        env:
+          CI: true
+
+      - name: Check test coverage meets threshold
+        run: |
+          COVERAGE_SUMMARY=$(cat coverage/coverage-summary.json)
+          LINES_COVERAGE=$(echo $COVERAGE_SUMMARY | jq -r '.total.lines.pct')
+          STATEMENTS_COVERAGE=$(echo $COVERAGE_SUMMARY | jq -r '.total.statements.pct')
+          FUNCTIONS_COVERAGE=$(echo $COVERAGE_SUMMARY | jq -r '.total.functions.pct')
+          BRANCHES_COVERAGE=$(echo $COVERAGE_SUMMARY | jq -r '.total.branches.pct')
+          
+          if (( $(echo "$LINES_COVERAGE < $MIN_COVERAGE" | bc -l) )) || \
+             (( $(echo "$STATEMENTS_COVERAGE < $MIN_COVERAGE" | bc -l) )) || \
+             (( $(echo "$FUNCTIONS_COVERAGE < $MIN_COVERAGE" | bc -l) )) || \
+             (( $(echo "$BRANCHES_COVERAGE < $MIN_COVERAGE" | bc -l) )); then
+            echo "Coverage is below minimum threshold of $MIN_COVERAGE%"
+            echo "Lines: $LINES_COVERAGE%"
+            echo "Statements: $STATEMENTS_COVERAGE%"
+            echo "Functions: $FUNCTIONS_COVERAGE%"
+            echo "Branches: $BRANCHES_COVERAGE%"
+            exit 1
+          fi
+        timeout-minutes: 1
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage-report
+          path: ${{ env.WORKING_DIRECTORY }}/coverage
+          retention-days: 14
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+          source-root: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+
+      - name: Cache build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ env.WORKING_DIRECTORY }}/dist
+            ${{ env.WORKING_DIRECTORY }}/.next
+            ${{ env.WORKING_DIRECTORY }}/.cache
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Build application
+        if: success()
+        run: npm run build
+        timeout-minutes: 5
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: build-artifacts
+          path: ${{ env.WORKING_DIRECTORY }}/dist
+          retention-days: 7
