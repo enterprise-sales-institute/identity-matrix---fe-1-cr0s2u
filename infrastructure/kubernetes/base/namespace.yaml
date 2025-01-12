@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: identity-matrix
+  labels:
+    name: identity-matrix
+    app: identity-matrix
+    environment: production
+    managed-by: terraform
+    security-tier: restricted
+    backup-enabled: "true"
+    monitoring: enabled
+  annotations:
+    description: "Production namespace for Identity Matrix application components"
+    security.kubernetes.io/enforce-pod-security: restricted
+    networking.k8s.io/isolation: enabled
+    backup.kubernetes.io/strategy: daily
+    monitoring.kubernetes.io/scrape: "true"
+    compliance.kubernetes.io/audit: enabled
+    security.kubernetes.io/network-policy: enabled
