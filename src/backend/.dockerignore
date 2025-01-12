@@ -1,0 +1,62 @@
+node_modules
+npm-debug.log*
+
+# Build outputs
+dist
+coverage
+*.tsbuildinfo
+
+# Test files
+tests
+jest.config.ts
+coverage
+
+# Version control
+.git
+.gitignore
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+*.cert
+
+# Development configs
+.eslintrc.ts
+.prettierrc
+nodemon.json
+tsconfig.json
+
+# Logs
+*.log
+logs
+
+# Documentation
+README.md
+CHANGELOG.md
+docs
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Debug files
+.npm
+.node_repl_history
+
+# Docker files
+Dockerfile*
+docker-compose*
+.docker
+
+# Misc development files
+.editorconfig
+.npmrc
