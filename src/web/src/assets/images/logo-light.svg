@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="60" viewBox="0 0 240 60" version="1.1" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Identity Matrix Logo">
+    <!-- Main Logo Container -->
+    <g id="identity-matrix-logo-light" fill="none" fill-rule="evenodd">
+        <!-- Matrix Grid Symbol -->
+        <g id="matrix-symbol" transform="translate(10, 10)">
+            <!-- Grid Background -->
+            <rect width="40" height="40" rx="4" fill="#ffffff"/>
+            
+            <!-- Matrix Grid Lines -->
+            <path d="M0 13.33h40M0 26.67h40M13.33 0v40M26.67 0v40" 
+                  stroke="#813efb" 
+                  stroke-width="1.5"
+                  stroke-linecap="round"/>
+            
+            <!-- Active Matrix Points -->
+            <circle cx="13.33" cy="13.33" r="4" fill="#813efb"/>
+            <circle cx="26.67" cy="26.67" r="4" fill="#813efb"/>
+        </g>
+
+        <!-- Wordmark -->
+        <g id="wordmark" transform="translate(65, 20)">
+            <!-- "Identity" Text -->
+            <path d="M0 20V0h5v20H0zm15-20h5v20h-5V0zm15 0h5v20h-5V0zm25 0h5v20h-5V0zm15 0h5v20h-5V0zm15 0h5v20h-5V0z"
+                  fill="#813efb"/>
+            
+            <!-- "Matrix" Text -->
+            <path d="M95 20V0h5l10 14V0h5v20h-5l-10-14v14h-5zm25-20h20v5h-15v5h10v5h-10v5h15v5h-20V0z"
+                  fill="#813efb"/>
+        </g>
+    </g>
+
+    <!-- Accessibility and Metadata -->
+    <title>Identity Matrix Logo</title>
+    <desc>Official logo of Identity Matrix - A visitor tracking and lead generation platform</desc>
+    
+    <!-- Optimization Metadata -->
+    <metadata>
+        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                 xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <rdf:Description>
+                <dc:title>Identity Matrix Logo</dc:title>
+                <dc:creator>Identity Matrix Design Team</dc:creator>
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type>Logo</dc:type>
+            </rdf:Description>
+        </rdf:RDF>
+    </metadata>
+</svg>
