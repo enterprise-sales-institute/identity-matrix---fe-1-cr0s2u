@@ -1,0 +1,78 @@
+---
+# StorageClass definition for AWS EBS-based persistent volumes
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: identity-matrix-storage
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: storage
+    managed-by: terraform
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3                # Using gp3 for better performance and cost-effectiveness
+  encrypted: "true"        # Enabling encryption for data at rest
+  fsType: ext4            # Using ext4 filesystem for broad compatibility
+  iops: "3000"            # Provisioned IOPS for consistent performance
+  throughput: "125"       # Throughput in MB/s for gp3 volumes
+reclaimPolicy: Retain     # Keeping data after PVC deletion for data safety
+volumeBindingMode: WaitForFirstConsumer  # Delay volume binding until pod scheduling
+allowVolumeExpansion: true  # Enable volume expansion if needed
+
+---
+# PostgreSQL PVC for transactional data with full retention
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-data
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: postgresql
+    managed-by: terraform
+spec:
+  accessModes:
+    - ReadWriteOnce  # Single node access for data consistency
+  storageClassName: identity-matrix-storage
+  resources:
+    requests:
+      storage: 50Gi  # 50GB for transactional data with room for growth
+
+---
+# MongoDB PVC for visitor tracking with 12-month rolling retention
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-data
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: mongodb
+    managed-by: terraform
+spec:
+  accessModes:
+    - ReadWriteOnce  # Single node access for document store
+  storageClassName: identity-matrix-storage
+  resources:
+    requests:
+      storage: 100Gi  # 100GB for visitor data with retention period
+
+---
+# Redis PVC for caching and session data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: redis
+    managed-by: terraform
+spec:
+  accessModes:
+    - ReadWriteOnce  # Single node access for cache consistency
+  storageClassName: identity-matrix-storage
+  resources:
+    requests:
+      storage: 20Gi  # 20GB for temporary cache and session data
