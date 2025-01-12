@@ -1,0 +1,120 @@
+# Kubernetes RBAC configuration for Identity Matrix application
+# Version: rbac.authorization.k8s.io/v1
+# Purpose: Define roles, bindings and service accounts with security controls
+
+---
+# Application Role with restricted permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: identity-matrix-app-role
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    security-tier: restricted
+    compliance: soc2-iso27001
+  annotations:
+    security.identitymatrix.io/audit: enabled
+    compliance.identitymatrix.io/controls: CC6.1,CC6.3,A.9.2.3
+rules:
+  # Pod and Service access
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["identity-matrix-*"]
+  
+  # Config and Secret access
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get"]
+    resourceNames: ["identity-matrix-config", "identity-matrix-secrets"]
+  
+  # Workload access
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["identity-matrix-*"]
+  
+  # Security policy access
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: ["identity-matrix-restricted"]
+  
+  # Network policy access
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list"]
+    resourceNames: ["identity-matrix-network-policy"]
+
+---
+# Service Account for application pods
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: identity-matrix-app
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    security-tier: restricted
+  annotations:
+    security.identitymatrix.io/rotation: 7d
+    security.identitymatrix.io/audit: enabled
+    compliance.identitymatrix.io/controls: CC6.1,A.9.2.3
+
+---
+# Role Binding to associate role with service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: identity-matrix-app-rolebinding
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    security-tier: restricted
+  annotations:
+    security.identitymatrix.io/audit: enabled
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: identity-matrix-app-role
+subjects:
+- kind: ServiceAccount
+  name: identity-matrix-app
+  namespace: identity-matrix
+
+---
+# Cluster Role for cross-namespace operations (restricted)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: identity-matrix-monitoring-role
+  labels:
+    app: identity-matrix
+    security-tier: restricted
+    compliance: soc2-iso27001
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list"]
+
+---
+# Cluster Role Binding for monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: identity-matrix-monitoring-binding
+  labels:
+    app: identity-matrix
+    security-tier: restricted
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: identity-matrix-monitoring-role
+subjects:
+- kind: ServiceAccount
+  name: identity-matrix-app
+  namespace: identity-matrix
