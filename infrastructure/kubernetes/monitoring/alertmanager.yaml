@@ -1,0 +1,90 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Alertmanager
+metadata:
+  name: identity-matrix-alertmanager
+  namespace: identity-matrix-monitoring
+  labels:
+    app: identity-matrix
+    component: monitoring
+    tier: observability
+spec:
+  # High availability configuration with 2 replicas
+  replicas: 2
+  version: v0.25.0
+  serviceAccountName: alertmanager
+  
+  # Security context for running as non-root
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 200m
+  
+  # Persistent storage configuration
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: standard
+  
+  # Reference to secret containing additional configuration
+  configSecret: alertmanager-config
+  
+  # Alert routing configuration
+  configRoutes:
+    groupBy:
+      - alertname
+      - cluster
+      - service
+      - severity
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    receiver: default
+    routes:
+      # Critical alerts route
+      - receiver: critical
+        matchers:
+          - severity = critical
+        groupWait: 10s
+        repeatInterval: 1h
+      
+      # Security alerts route
+      - receiver: security
+        matchers:
+          - team = security
+        groupWait: 0s
+        repeatInterval: 30m
+  
+  # Alert receivers configuration
+  receivers:
+    - name: default
+      # Email notification configuration
+      emailConfigs:
+        - to: team@identity-matrix.com
+          from: alertmanager@identity-matrix.com
+          smarthost: smtp.identity-matrix.com:587
+          requireTLS: true
+          tlsConfig:
+            insecureSkipVerify: false
+      
+      # Slack notification configuration
+      slackConfigs:
+        - channel: '#alerts'
+          apiURL: https://hooks.slack.com/services/xxx/yyy/zzz
+          sendResolved: true
+          title: '{{ .CommonAnnotations.summary }}'
