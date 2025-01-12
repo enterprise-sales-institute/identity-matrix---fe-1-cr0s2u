@@ -1,0 +1,106 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: identity-matrix-prometheus
+  namespace: identity-matrix-monitoring
+  labels:
+    app: identity-matrix
+    component: monitoring
+spec:
+  # High availability configuration with 2 replicas
+  replicas: 2
+  version: v2.42.0
+  serviceAccountName: prometheus
+  
+  # Security context for running as non-root
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+  
+  # Resource allocation for performance and stability
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+  
+  # Persistent storage configuration
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  
+  # Service discovery configuration
+  serviceMonitorSelector:
+    matchLabels:
+      app: identity-matrix
+  
+  # Alertmanager integration
+  alerting:
+    alertmanagers:
+      - name: identity-matrix-alertmanager
+        namespace: identity-matrix-monitoring
+        port: web
+  
+  # Data retention and scraping configuration
+  retention: 30d
+  scrapeInterval: 15s
+  evaluationInterval: 15s
+  
+  # Additional monitoring configurations
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
+  
+  # Rule configurations
+  ruleSelector:
+    matchLabels:
+      app: identity-matrix
+      role: alert-rules
+  
+  # Pod monitoring configuration
+  podMonitorSelector:
+    matchLabels:
+      app: identity-matrix
+  
+  # Security and RBAC settings
+  serviceMonitorNamespaceSelector: {}
+  podMonitorNamespaceSelector: {}
+  ruleNamespaceSelector: {}
+  
+  # Thanos configuration for long-term storage
+  thanos:
+    baseImage: quay.io/thanos/thanos
+    version: v0.30.2
+    objectStorageConfig:
+      key: thanos.yaml
+      name: thanos-objstore-config
+  
+  # Web configuration
+  web:
+    pageTitle: Identity Matrix Monitoring
+    
+  # Remote write configuration for backup
+  remoteWrite:
+    - url: "http://remote-write-endpoint:9090/api/v1/write"
+      writeRelabelConfigs:
+        - sourceLabels: [__name__]
+          regex: '{__name__=~"job:.+"}'
+          action: keep
+  
+  # Logging configuration
+  logLevel: info
+  logFormat: json
+  
+  # Query configuration
+  query:
+    maxSamples: 50000000
+    timeout: 2m
+    maxConcurrency: 20
