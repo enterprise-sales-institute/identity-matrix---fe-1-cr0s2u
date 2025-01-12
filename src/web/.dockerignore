@@ -1,0 +1,71 @@
+node_modules
+dist
+coverage
+
+# Version control
+.git
+.gitignore
+
+# IDE configurations
+.vscode
+.idea
+
+# Environment and configuration files
+.env*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files and directories
+*.test.ts
+*.test.tsx
+__tests__
+__mocks__
+jest.config.ts
+
+# Development configuration files
+.eslintrc.ts
+.prettierrc
+tsconfig.json
+
+# Documentation
+*.md
+README.md
+CHANGELOG.md
+LICENSE
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Exceptions - files required for build
+!package.json
+!package-lock.json
+!vite.config.ts
+!index.html
+
+# Development assets and source maps
+*.map
+.DS_Store
+
+# Cache directories
+.cache
+.npm
+.eslintcache
+.stylelintcache
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Build reports and statistics
+stats.json
+bundle-stats.json
+size-plugin.json
+
+# Miscellaneous
+.editorconfig
+.browserslistrc
+.nvmrc
