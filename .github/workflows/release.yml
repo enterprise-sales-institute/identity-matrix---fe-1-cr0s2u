@@ -1,0 +1,201 @@
+name: Release Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Environment configuration
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: identity-matrix-prod
+  ECR_REPOSITORY_PREFIX: identity-matrix
+  CANARY_WEIGHT_INITIAL: 10
+  CANARY_WEIGHT_INCREMENT: 20
+  NODE_VERSION: '18.x'
+
+# Ensure only one release workflow runs at a time
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate Code & Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Run backend validation from backend-ci.yml
+      - name: Run Backend Validation
+        uses: ./.github/workflows/backend-ci.yml
+        with:
+          workflow: build-and-test
+
+      # Run frontend validation from frontend-ci.yml
+      - name: Run Frontend Validation
+        uses: ./.github/workflows/frontend-ci.yml
+        with:
+          workflow: validate
+
+      # Additional security scans
+      - name: Run SAST Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  build:
+    name: Build & Push Images
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configure AWS credentials using OIDC
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        id: ecr-login
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Build and push frontend image
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/web
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-frontend:${{ github.ref_name }}
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+          platforms: linux/amd64
+          provenance: true
+          sbom: true
+
+      # Build and push backend image
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/backend
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-backend:${{ github.ref_name }}
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+          platforms: linux/amd64
+          provenance: true
+          sbom: true
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.identitymatrix.com
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      # Deploy canary version
+      - name: Deploy canary version
+        run: |
+          # Update image tags in deployment manifests
+          sed -i "s|image:.*|image: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-frontend:${{ github.ref_name }}|" infrastructure/kubernetes/frontend/deployment.yaml
+          sed -i "s|image:.*|image: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-backend:${{ github.ref_name }}|" infrastructure/kubernetes/backend/deployment.yaml
+          
+          # Apply canary deployments
+          kubectl apply -f infrastructure/kubernetes/frontend/deployment.yaml
+          kubectl apply -f infrastructure/kubernetes/backend/deployment.yaml
+          
+          # Set initial traffic weight
+          kubectl patch svc frontend-service -p "{\"spec\":{\"trafficPolicy\":{\"canary\":{\"weight\":${{ env.CANARY_WEIGHT_INITIAL }}}}}"
+          kubectl patch svc backend-service -p "{\"spec\":{\"trafficPolicy\":{\"canary\":{\"weight\":${{ env.CANARY_WEIGHT_INITIAL }}}}}"
+
+      # Monitor canary health
+      - name: Monitor canary health
+        run: |
+          for i in {1..5}; do
+            # Check deployment status
+            FRONTEND_READY=$(kubectl get deploy frontend-canary -o jsonpath='{.status.readyReplicas}')
+            BACKEND_READY=$(kubectl get deploy backend-canary -o jsonpath='{.status.readyReplicas}')
+            
+            if [ "$FRONTEND_READY" -gt 0 ] && [ "$BACKEND_READY" -gt 0 ]; then
+              echo "Canary deployments are healthy"
+              
+              # Gradually increase traffic
+              NEW_WEIGHT=$((CANARY_WEIGHT_INITIAL + (i * CANARY_WEIGHT_INCREMENT)))
+              kubectl patch svc frontend-service -p "{\"spec\":{\"trafficPolicy\":{\"canary\":{\"weight\":$NEW_WEIGHT}}}"
+              kubectl patch svc backend-service -p "{\"spec\":{\"trafficPolicy\":{\"canary\":{\"weight\":$NEW_WEIGHT}}}"
+              
+              sleep 300 # Wait 5 minutes between increases
+            else
+              echo "Canary deployments are not healthy"
+              exit 1
+            fi
+          done
+
+      # Promote canary to production
+      - name: Promote to production
+        if: success()
+        run: |
+          # Update production deployments
+          kubectl set image deployment/frontend frontend=${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-frontend:${{ github.ref_name }}
+          kubectl set image deployment/backend backend=${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY_PREFIX }}-backend:${{ github.ref_name }}
+          
+          # Remove canary deployments
+          kubectl delete -f infrastructure/kubernetes/frontend/canary.yaml
+          kubectl delete -f infrastructure/kubernetes/backend/canary.yaml
+
+      # Rollback on failure
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          # Remove canary deployments
+          kubectl delete -f infrastructure/kubernetes/frontend/canary.yaml
+          kubectl delete -f infrastructure/kubernetes/backend/canary.yaml
+          
+          # Reset traffic to stable version
+          kubectl patch svc frontend-service -p '{"spec":{"trafficPolicy":{"canary":{"weight":0}}}}'
+          kubectl patch svc backend-service -p '{"spec":{"trafficPolicy":{"canary":{"weight":0}}}}'
+          
+          echo "Deployment failed, rolled back to stable version"
+          exit 1
