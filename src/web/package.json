@@ -1,0 +1,113 @@
+{
+  "name": "identity-matrix-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --max-warnings 0",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "analyze": "vite build --analyze",
+    "precommit": "lint-staged",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@axe-core/react": "4.x",
+    "@identity-matrix/analytics": "1.x",
+    "@material-table/core": "5.x",
+    "@mui/material": "5.x",
+    "@reduxjs/toolkit": "1.9.x",
+    "axios": "1.x",
+    "axios-retry": "3.x",
+    "classnames": "2.x",
+    "crypto-js": "4.1.x",
+    "date-fns": "2.x",
+    "dayjs": "1.11.x",
+    "events": "3.x",
+    "framer-motion": "6.x",
+    "jwt-decode": "3.x",
+    "lodash": "4.17.x",
+    "numeral": "2.0.x",
+    "pkce-challenge": "2.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-error-boundary": "4.x",
+    "react-hook-form": "7.x",
+    "react-redux": "8.x",
+    "react-router-dom": "6.x",
+    "react-virtual": "2.x",
+    "resize-observer-polyfill": "1.5.x",
+    "socket.io-client": "4.x",
+    "styled-components": "5.x",
+    "styled-normalize": "8.x",
+    "validator": "13.x",
+    "yup": "1.x"
+  },
+  "devDependencies": {
+    "@jest/globals": "29.x",
+    "@jest/types": "29.5.0",
+    "@testing-library/jest-dom": "5.x",
+    "@testing-library/react": "13.x",
+    "@testing-library/user-event": "14.x",
+    "@types/jest": "29.x",
+    "@types/node": "18.x",
+    "@types/react": "18.x",
+    "@types/react-dom": "18.x",
+    "@types/styled-components": "5.x",
+    "@typescript-eslint/eslint-plugin": "5.61.0",
+    "@typescript-eslint/parser": "5.61.0",
+    "@vitejs/plugin-react": "4.0.x",
+    "eslint": "8.x",
+    "eslint-config-prettier": "8.8.0",
+    "eslint-plugin-react": "7.32.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "husky": "8.x",
+    "jest": "29.x",
+    "jest-axe": "7.x",
+    "jest-environment-jsdom": "29.x",
+    "lint-staged": "13.x",
+    "prettier": "2.8.8",
+    "terser": "5.x",
+    "typescript": "4.9.x",
+    "vite": "4.3.9",
+    "vite-plugin-analyze": "1.x",
+    "vitest": "0.34.x"
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 83",
+      "firefox >= 78",
+      "safari >= 13",
+      "edge >= 84",
+      "ios_saf >= 13",
+      "android >= 83",
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}
