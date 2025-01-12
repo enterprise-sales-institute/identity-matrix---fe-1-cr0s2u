@@ -1,0 +1,53 @@
+# ServiceMonitor CRD for Identity Matrix Platform Monitoring
+# Version: monitoring.coreos.com/v1
+# Purpose: Configures service discovery and metrics collection for platform components
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: identity-matrix-servicemonitor
+  namespace: identity-matrix-monitoring
+  labels:
+    app: identity-matrix
+    component: monitoring
+    tier: observability
+    version: v1
+
+spec:
+  # Service selector configuration
+  selector:
+    matchLabels:
+      app: identity-matrix
+
+  # Target namespace selection
+  namespaceSelector:
+    matchNames:
+      - identity-matrix
+
+  # Endpoints configuration for metrics collection
+  endpoints:
+    # System metrics endpoint
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      metricRelabelings:
+        # Keep only essential performance and resource metrics
+        - sourceLabels: ["__name__"]
+          regex: "^(http_requests_total|http_request_duration_seconds|process_cpu_seconds_total|process_resident_memory_bytes)$"
+          action: keep
+
+    # Health check endpoint
+    - port: http
+      path: /api/health
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+      params:
+        format: 
+          - prometheus
+
+  # Resource limits for metrics collection
+  sampleLimit: 10000
+  targetLimit: 100
