@@ -1,0 +1,30 @@
+[Binary ICO file content with the following specifications]
+
+File Format: ICO (Windows Icon)
+File Size: < 5KB
+Color Depth: 32-bit RGBA
+
+Contains 3 image sizes:
+- 16x16 pixels
+- 32x32 pixels  
+- 48x48 pixels
+
+Each size variant includes:
+- Primary color: #813efb
+- Transparent background
+- Anti-aliasing enabled
+- Optimized compression
+
+Image format: 
+- Windows ICO container
+- PNG-compressed images inside ICO
+- Alpha channel support
+- Multiple resolution support
+
+Browser optimizations:
+- ICO format for maximum compatibility
+- Multiple resolutions for different contexts
+- Compressed without quality loss
+- Cache-Control headers for CDN caching
+
+[Note: The actual binary content would be generated using an image editing tool that supports ICO format with the above specifications]
