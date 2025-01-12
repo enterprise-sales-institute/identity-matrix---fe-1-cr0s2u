@@ -1,0 +1,50 @@
+* @global-maintainers
+
+# Backend codebase ownership
+/src/backend/* @backend-team
+/src/backend/src/config/* @security-team @backend-team
+/src/backend/src/services/auth/* @security-team @backend-team
+/src/backend/src/security/* @security-team
+
+# Frontend codebase ownership
+/src/web/* @frontend-team
+
+# Infrastructure and deployment
+/infrastructure/* @devops-team
+/.github/workflows/* @devops-team @security-team
+*.tf @devops-team @security-team
+*.yaml @devops-team
+
+# Security-sensitive files
+package*.json @security-team
+*.env.* @security-team @devops-team
+
+# Documentation ownership
+/docs/* @global-maintainers @backend-team @frontend-team
+
+# Test ownership follows implementation ownership
+/src/backend/tests/* @backend-team
+/src/web/tests/* @frontend-team
+
+# API contracts require cross-team review
+/src/backend/src/api/* @backend-team @frontend-team
+
+# Database migrations require extra scrutiny
+/src/backend/src/migrations/* @backend-team @security-team @devops-team
+
+# Shared utilities and common code
+/src/shared/* @backend-team @frontend-team
+
+# Security policy and compliance documents
+/SECURITY.md @security-team
+/COMPLIANCE.md @security-team
+
+# Build and dependency configurations
+/docker/* @devops-team
+/kubernetes/* @devops-team
+/.dockerignore @devops-team
+/docker-compose*.yml @devops-team
+
+# CI/CD and automation
+/.github/actions/* @devops-team
+/.github/CODEOWNERS @security-team @global-maintainers
