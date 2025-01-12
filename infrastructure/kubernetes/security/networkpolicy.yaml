@@ -1,0 +1,103 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: identity-matrix-network-policy
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: security
+    tier: network
+    managed-by: terraform
+  annotations:
+    description: "Network security policy for Identity Matrix application components"
+    security.kubernetes.io/policy-type: "strict"
+    audit.kubernetes.io/logging: "enabled"
+
+spec:
+  # Select all pods in the identity-matrix application
+  podSelector:
+    matchLabels:
+      app: identity-matrix
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # Ingress rules for incoming traffic
+  ingress:
+    # Allow frontend to backend communication
+    - from:
+        - podSelector:
+            matchLabels:
+              app: identity-matrix
+              component: frontend
+      ports:
+        # HTTP API access
+        - port: 3000
+          protocol: TCP
+        # WebSocket connections
+        - port: 3001
+          protocol: TCP
+
+  # Egress rules for outgoing traffic
+  egress:
+    # Allow backend services communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: identity-matrix
+              component: backend
+      ports:
+        # Backend service ports
+        - port: 3000
+          protocol: TCP
+        - port: 3001
+          protocol: TCP
+
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        # DNS UDP
+        - port: 53
+          protocol: UDP
+        # DNS TCP fallback
+        - port: 53
+          protocol: TCP
+
+    # Allow metrics collection
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        # Prometheus metrics
+        - port: 9090
+          protocol: TCP
+
+    # Allow logging
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: logging
+      ports:
+        # Logging service
+        - port: 24224
+          protocol: TCP
+
+    # Allow external API calls with TLS
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
