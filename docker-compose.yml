@@ -1,0 +1,172 @@
+version: "3.9"
+
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: ./src/web
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://backend:3000
+    depends_on:
+      - backend
+    volumes:
+      - ./src/web:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # Backend API service
+  backend:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/identity_matrix
+      - MONGODB_URI=mongodb://mongodb:27017/identity_matrix
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./src/api:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=identity_matrix
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  # MongoDB database
+  mongodb:
+    image: mongo:6.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+      - MONGO_INITDB_DATABASE=identity_matrix
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    command: ["--wiredTigerCacheSizeGB", "1"]
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  # Redis cache
+  redis:
+    image: redis:7.0-alpine
+    command: redis-server --appendonly yes --requirepass redis
+    environment:
+      - REDIS_PASSWORD=redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
+    internal: true
+    attachable: false
+    enable_ipv6: false
+    driver_opts:
+      com.docker.network.bridge.name: identity_matrix_net
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
