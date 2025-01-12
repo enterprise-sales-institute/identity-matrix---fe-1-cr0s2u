@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: identity-matrix-config
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: config
+    managed-by: terraform
+
+data:
+  # Server Configuration
+  NODE_ENV: "production"
+  API_VERSION: "v1"
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  API_PREFIX: "/api"
+  BODY_LIMIT: "50mb"
+  CORS_ENABLED: "true"
+  COMPRESSION_ENABLED: "true"
+  REQUEST_LOGGING: "true"
+
+  # PostgreSQL Configuration
+  POSTGRES_HOST: "identity-matrix-postgresql"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "identity_matrix"
+
+  # MongoDB Configuration
+  MONGODB_URI: "mongodb://identity-matrix-mongodb:27017/identity_matrix"
+
+  # Redis Configuration
+  REDIS_HOST: "identity-matrix-redis"
+  REDIS_PORT: "6379"
+
+  # Logging Configuration
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+
+  # API Documentation
+  ENABLE_SWAGGER: "true"
+
+  # Connection Pool Settings
+  MAX_POOL_SIZE: "20"
+  MIN_POOL_SIZE: "5"
+  POOL_ACQUIRE_TIMEOUT: "30000"
+  POOL_IDLE_TIMEOUT: "10000"
+
+  # MongoDB Specific Settings
+  SERVER_SELECTION_TIMEOUT: "5000"
+  HEARTBEAT_FREQUENCY: "10000"
+  RETRY_WRITES: "true"
+
+  # Security Settings
+  SSL_ENABLED: "true"
