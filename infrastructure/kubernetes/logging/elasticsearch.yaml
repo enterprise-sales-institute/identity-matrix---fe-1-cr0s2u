@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: List
+items:
+# Service definition for Elasticsearch
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch
+    namespace: identity-matrix-logging
+    labels:
+      app: identity-matrix
+      component: elasticsearch
+  spec:
+    ports:
+      - port: 9200
+        targetPort: 9200
+        name: http
+      - port: 9300
+        targetPort: 9300
+        name: transport
+    selector:
+      app: identity-matrix
+      component: elasticsearch
+    type: ClusterIP
+
+# ConfigMap for Elasticsearch configuration
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: elasticsearch-config
+    namespace: identity-matrix-logging
+    labels:
+      app: identity-matrix
+      component: elasticsearch
+  data:
+    elasticsearch.yml: |
+      cluster.name: identity-matrix-logs
+      node.name: ${HOSTNAME}
+      network.host: 0.0.0.0
+      discovery.type: single-node
+      xpack.security.enabled: true
+      xpack.monitoring.enabled: true
+
+# StatefulSet for Elasticsearch deployment
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    name: elasticsearch
+    namespace: identity-matrix-logging
+    labels:
+      app: identity-matrix
+      component: elasticsearch
+  spec:
+    serviceName: elasticsearch
+    replicas: 1
+    selector:
+      matchLabels:
+        app: identity-matrix
+        component: elasticsearch
+    template:
+      metadata:
+        labels:
+          app: identity-matrix
+          component: elasticsearch
+      spec:
+        containers:
+          - name: elasticsearch
+            # Elasticsearch version 7.17.0 for stability and security features
+            image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+            ports:
+              - containerPort: 9200
+                name: http
+              - containerPort: 9300
+                name: transport
+            env:
+              - name: ES_JAVA_OPTS
+                value: "-Xms512m -Xmx512m"
+              - name: discovery.type
+                value: "single-node"
+            resources:
+              limits:
+                cpu: "2000m"
+                memory: "2Gi"
+              requests:
+                cpu: "1000m"
+                memory: "1Gi"
+            volumeMounts:
+              - name: elasticsearch-data
+                mountPath: /usr/share/elasticsearch/data
+              - name: elasticsearch-config
+                mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+                subPath: elasticsearch.yml
+            readinessProbe:
+              httpGet:
+                path: /_cluster/health
+                port: 9200
+              initialDelaySeconds: 30
+              periodSeconds: 10
+            livenessProbe:
+              httpGet:
+                path: /_cluster/health
+                port: 9200
+              initialDelaySeconds: 60
+              periodSeconds: 30
+        volumes:
+          - name: elasticsearch-config
+            configMap:
+              name: elasticsearch-config
+    volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: identity-matrix-storage
+          resources:
+            requests:
+              storage: 100Gi
