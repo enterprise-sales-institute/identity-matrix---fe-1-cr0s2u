@@ -1,0 +1,23 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ext": ".ts,.js,.json",
+  "ignore": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "tests/**/*",
+    "coverage/**/*",
+    "dist/**/*",
+    "node_modules/**/*"
+  ],
+  "exec": "ts-node ./src/server.ts",
+  "events": {
+    "restart": "echo \"[Nodemon] App restarted due to changes\""
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "TS_NODE_PROJECT": "./tsconfig.json"
+  },
+  "delay": "1000"
+}
