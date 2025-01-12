@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-matrix-frontend
+  namespace: identity-matrix
+  labels:
+    app: identity-matrix
+    component: frontend
+    version: latest
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    deployment.kubernetes.io/revision: "1"
+spec:
+  # High availability with 3 replicas
+  replicas: 3
+  selector:
+    matchLabels:
+      app: identity-matrix
+      component: frontend
+  # Zero-downtime rolling update strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: identity-matrix
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: identity-matrix/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
+              name: http
+          # Resource limits to ensure optimal performance
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          # Health checks for high availability
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          # Environment configuration
+          envFrom:
+            - configMapRef:
+                name: identity-matrix-config
+          env:
+            - name: NODE_ENV
+              value: production
