@@ -1,0 +1,56 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: identity-matrix-restricted
+  annotations:
+    # Enforce default runtime security profiles
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  # Prevent privileged containers and privilege escalation
+  privileged: false
+  allowPrivilegeEscalation: false
+  
+  # Drop all Linux capabilities for enhanced security
+  requiredDropCapabilities:
+    - ALL
+  
+  # Allow only necessary volume types
+  volumes:
+    - configMap
+    - emptyDir
+    - projected
+    - secret
+    - persistentVolumeClaim
+  
+  # Prevent host namespace access
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  
+  # Enforce non-root user execution
+  runAsUser:
+    rule: MustRunAsNonRoot
+  
+  # SELinux configuration
+  seLinux:
+    rule: RunAsAny
+  
+  # Supplemental groups configuration
+  supplementalGroups:
+    rule: MustRunAs
+    ranges:
+      - min: 1000
+        max: 65535
+  
+  # Filesystem group configuration
+  fsGroup:
+    rule: MustRunAs
+    ranges:
+      - min: 1000
+        max: 65535
+  
+  # Enforce read-only root filesystem
+  readOnlyRootFilesystem: true
