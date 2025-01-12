@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#813efb">
+    <meta name="description" content="Identity Matrix - Advanced Visitor Tracking and Lead Generation Platform for B2B Companies">
+    <meta name="application-name" content="Identity Matrix">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>Identity Matrix</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./src/assets/images/favicon.ico">
+    <link rel="apple-touch-icon" href="./src/assets/images/favicon.ico">
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+    <!-- Font loading optimization -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https:;
+        connect-src 'self' ws: wss:;
+        frame-ancestors 'none';
+        form-action 'self';
+        base-uri 'self';
+        upgrade-insecure-requests;
+    ">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+
+    <!-- Base styles to prevent FOUC -->
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: #ffffff;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a1a1a;
+                color: #ffffff;
+            }
+        }
+        #root {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <!-- React mount point -->
+    </div>
+    <noscript>
+        <div style="display: block; padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+            JavaScript is required to run Identity Matrix. Please enable JavaScript in your browser settings.
+        </div>
+    </noscript>
+
+    <!-- Application entry point -->
+    <script type="module" src="./src/index.tsx"></script>
+
+    <!-- Browser compatibility check -->
+    <script>
+        if (!(
+            'ES2022' in window &&
+            'WebSocket' in window &&
+            'IntersectionObserver' in window &&
+            'ResizeObserver' in window &&
+            'Worker' in window &&
+            CSS.supports('display', 'grid') &&
+            CSS.supports('--custom-property', 'value')
+        )) {
+            document.getElementById('root').innerHTML = 
+                '<div style="padding: 20px; text-align: center;">' +
+                'Your browser is not supported. Please use a modern browser like Chrome 83+, Firefox 78+, Safari 13+, or Edge 84+.' +
+                '</div>';
+        }
+    </script>
+</body>
+</html>
