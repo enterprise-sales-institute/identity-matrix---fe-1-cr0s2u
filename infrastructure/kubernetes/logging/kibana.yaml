@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: List
+items:
+  # Kibana Service definition
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: kibana
+      namespace: identity-matrix-logging
+      labels:
+        app: identity-matrix
+        component: kibana
+    spec:
+      ports:
+        - port: 5601
+          targetPort: 5601
+          name: http
+      selector:
+        app: identity-matrix
+        component: kibana
+      type: ClusterIP
+
+  # Kibana ConfigMap for configuration
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: kibana-config
+      namespace: identity-matrix-logging
+      labels:
+        app: identity-matrix
+        component: kibana
+    data:
+      kibana.yml: |
+        server.name: kibana
+        server.host: 0.0.0.0
+        elasticsearch.hosts: http://elasticsearch:9200
+        monitoring.ui.container.elasticsearch.enabled: true
+        xpack.security.enabled: true
+        xpack.monitoring.enabled: true
+
+  # Kibana Deployment
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: kibana
+      namespace: identity-matrix-logging
+      labels:
+        app: identity-matrix
+        component: kibana
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: identity-matrix
+          component: kibana
+      template:
+        metadata:
+          labels:
+            app: identity-matrix
+            component: kibana
+        spec:
+          containers:
+            - name: kibana
+              image: docker.elastic.co/kibana/kibana:7.17.0
+              ports:
+                - containerPort: 5601
+                  name: http
+              resources:
+                limits:
+                  cpu: "1000m"
+                  memory: "1Gi"
+                requests:
+                  cpu: "500m"
+                  memory: "512Mi"
+              volumeMounts:
+                - name: kibana-config
+                  mountPath: /usr/share/kibana/config/kibana.yml
+                  subPath: kibana.yml
+              readinessProbe:
+                httpGet:
+                  path: /api/status
+                  port: 5601
+                initialDelaySeconds: 30
+                periodSeconds: 10
+              livenessProbe:
+                httpGet:
+                  path: /api/status
+                  port: 5601
+                initialDelaySeconds: 60
+                periodSeconds: 30
+          volumes:
+            - name: kibana-config
+              configMap:
+                name: kibana-config
