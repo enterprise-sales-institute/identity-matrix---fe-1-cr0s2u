@@ -73,6 +73,3 @@ export const WEBSOCKET_CONFIG = {
         path: '/ws'
     } as WebSocketOptions
 };
-
-// Type assertion to ensure config object matches WebSocketOptions interface
-const _typeCheck: WebSocketOptions = WEBSOCKET_CONFIG.options;
