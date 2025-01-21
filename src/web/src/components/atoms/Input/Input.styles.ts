@@ -1,5 +1,5 @@
 import styled from 'styled-components'; // v5.x
-import { colors, spacing } from '../../../styles/variables.styles';
+import { colors, spacing, typography } from '../../../styles/variables.styles';
 
 // Constants for input styling
 const inputHeight = '40px';
@@ -56,7 +56,7 @@ export const StyledInput = styled.input<{ error?: boolean }>`
   border: 1px solid ${props => getInputBorderColor(props, props.error)};
   background: ${props => getInputBackground(props)};
   color: ${props => props.theme.mode === 'dark' ? colors.text.dark : colors.text.light};
-  font-family: ${props => props.theme.typography?.fontFamilyBody};
+  font-family: ${typography.fontFamilyBody};
   font-size: 16px;
   width: 100%;
 
