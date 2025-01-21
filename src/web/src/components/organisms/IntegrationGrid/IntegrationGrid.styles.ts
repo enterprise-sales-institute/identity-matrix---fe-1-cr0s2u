@@ -1,5 +1,4 @@
 import styled from 'styled-components'; // v5.3.x
-import type { DefaultTheme } from 'styled-components';
 
 /**
  * Constants for grid layout and animations
