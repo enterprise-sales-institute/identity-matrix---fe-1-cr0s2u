@@ -2,10 +2,10 @@ import styled from 'styled-components'; // v5.x
 import { colors, spacing, breakpoints, typography } from '../../../styles/variables.styles';
 
 // Spacing constants for consistent layout
-const FORM_SPACING = spacing.baseUnit * 3;
-const FIELD_SPACING = spacing.baseUnit * 2;
+const FORM_SPACING = parseInt(spacing.baseUnit) * 3;
+const FIELD_SPACING = parseInt(spacing.baseUnit) * 2;
 const TRANSITION_DURATION = '0.2s';
-const MOBILE_PADDING = spacing.baseUnit * 2;
+const MOBILE_PADDING = parseInt(spacing.baseUnit) * 2;
 
 /**
  * Main container for registration form with responsive layout
@@ -19,7 +19,7 @@ export const RegisterFormContainer = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${FORM_SPACING}px;
-  background: ${({ theme }) => theme.colors.background[theme.mode]};
+  background: ${({ theme }) => theme.colors.background[theme.mode === 'dark' ? 'dark' : 'light']};
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background ${TRANSITION_DURATION} ease;
@@ -44,7 +44,7 @@ export const RegisterFormTitle = styled.h1`
   line-height: ${typography.lineHeight.tight};
   font-weight: ${typography.fontWeight.semibold};
   text-align: center;
-  color: ${({ theme }) => theme.colors.text[theme.mode]};
+  color: ${({ theme }) => theme.colors.text[theme.mode === 'dark' ? 'dark' : 'light']};
   margin-bottom: ${FORM_SPACING}px;
   transition: color ${TRANSITION_DURATION} ease;
 
@@ -65,7 +65,7 @@ export const RegisterFormFields = styled.div`
   & label {
     font-family: ${typography.fontFamilyBody};
     font-size: ${typography.fontSize.sm};
-    color: ${({ theme }) => theme.colors.text[theme.mode]};
+    color: ${({ theme }) => theme.colors.text[theme.mode === 'dark' ? 'dark' : 'light']};
     margin-bottom: 4px;
     transition: color ${TRANSITION_DURATION} ease;
   }
@@ -73,12 +73,12 @@ export const RegisterFormFields = styled.div`
   & input {
     width: 100%;
     padding: ${spacing.space.sm} ${spacing.space.md};
-    background: ${({ theme }) => theme.colors.inputBackground[theme.mode]};
-    border: 1px solid ${({ theme }) => theme.colors.border[theme.mode]};
+    background: ${({ theme }) => theme.colors.inputBackground[theme.mode === 'dark' ? 'dark' : 'light']};
+    border: 1px solid ${({ theme }) => theme.colors.border[theme.mode === 'dark' ? 'dark' : 'light']};
     border-radius: 4px;
     font-family: ${typography.fontFamilyBody};
     font-size: ${typography.fontSize.base};
-    color: ${({ theme }) => theme.colors.text[theme.mode]};
+    color: ${({ theme }) => theme.colors.text[theme.mode === 'dark' ? 'dark' : 'light']};
     transition: all ${TRANSITION_DURATION} ease;
 
     &:focus-visible {
@@ -88,7 +88,7 @@ export const RegisterFormFields = styled.div`
     }
 
     &::placeholder {
-      color: ${({ theme }) => theme.colors.text[theme.mode]}80;
+      color: ${({ theme }) => theme.colors.text[theme.mode === 'dark' ? 'dark' : 'light']}80;
     }
   }
 `;
@@ -119,7 +119,7 @@ export const RegisterFormActions = styled.div`
     &:hover {
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      background: ${({ theme }) => theme.colors.hover[theme.mode]};
+      background: ${({ theme }) => theme.colors.hover[theme.mode === 'dark' ? 'dark' : 'light']};
     }
 
     &:focus-visible {
@@ -141,7 +141,7 @@ export const RegisterFormFooter = styled.div`
   text-align: center;
   margin-top: ${FORM_SPACING}px;
   font-family: ${typography.fontFamilyBody};
-  color: ${({ theme }) => theme.colors.text[theme.mode]};
+  color: ${({ theme }) => theme.colors.text[theme.mode === 'dark' ? 'dark' : 'light']};
   font-size: ${typography.fontSize.sm};
   transition: color ${TRANSITION_DURATION} ease;
 
