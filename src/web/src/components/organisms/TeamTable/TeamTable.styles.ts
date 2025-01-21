@@ -10,7 +10,7 @@ const MAX_TABLE_WIDTH = '1200px';
 const HEADER_HEIGHT = '56px';
 
 // Helper function for responsive padding
-const getResponsivePadding = (theme: any) => `
+const getResponsivePadding = () => `
   padding: ${MOBILE_PADDING}px;
   
   ${breakpoints.mediaQueries.tablet} {
