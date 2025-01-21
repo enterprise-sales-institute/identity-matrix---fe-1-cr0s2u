@@ -7,7 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary'; // v4.x
 // Internal imports
 import { Button } from '../../atoms/Button/Button';
 import { useVisitorData } from '../../../hooks/useVisitorData';
-import { Visitor, VisitorStatus } from '../../../types/visitor.types';
+import { Visitor, VisitorStatus, VisitorFilter } from '../../../types/visitor.types';
 
 /**
  * Interface for VisitorTable component props
@@ -17,7 +17,6 @@ interface VisitorTableProps {
   onVisitorSelect?: (visitor: Visitor) => void;
   onExport?: () => Promise<void>;
   pageSize?: number;
-  enableRealtime?: boolean;
   showConnectionStatus?: boolean;
   virtualization?: boolean;
 }
@@ -30,20 +29,17 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
   onVisitorSelect = () => {},
   onExport = async () => {},
   pageSize = 25,
-  enableRealtime = true,
   showConnectionStatus = true,
   virtualization = true
 }) => {
   // Local state
   const [exportLoading, setExportLoading] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<Visitor[]>([]);
 
   // Hook for visitor data management
   const {
     visitors,
     loading,
     error,
-    total,
     connectionStatus,
     fetchVisitors,
     selectVisitor,
@@ -58,19 +54,19 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
     {
       title: 'Email',
       field: 'email',
-      render: (rowData) => rowData.email || 'Anonymous',
+      render: (rowData: Visitor) => rowData.email || 'Anonymous',
       width: '20%'
     },
     {
       title: 'Company',
       field: 'enrichedData.company',
-      render: (rowData) => rowData.enrichedData?.company || '-',
+      render: (rowData: Visitor) => rowData.enrichedData?.company || '-',
       width: '20%'
     },
     {
       title: 'Status',
       field: 'status',
-      render: (rowData) => (
+      render: (rowData: Visitor) => (
         <span className={`status-badge status-${rowData.status.toLowerCase()}`}>
           {rowData.status}
         </span>
@@ -80,7 +76,7 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
     {
       title: 'Location',
       field: 'metadata.location',
-      render: (rowData) => (
+      render: (rowData: Visitor) => (
         `${rowData.metadata.location.city}, ${rowData.metadata.location.country}`
       ),
       width: '15%'
@@ -88,14 +84,14 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
     {
       title: 'First Seen',
       field: 'firstSeen',
-      render: (rowData) => dayjs(rowData.firstSeen).format('MMM D, YYYY HH:mm'),
+      render: (rowData: Visitor) => dayjs(rowData.firstSeen).format('MMM D, YYYY HH:mm'),
       defaultSort: 'desc',
       width: '15%'
     },
     {
       title: 'Last Seen',
       field: 'lastSeen',
-      render: (rowData) => dayjs(rowData.lastSeen).format('MMM D, YYYY HH:mm'),
+      render: (rowData: Visitor) => dayjs(rowData.lastSeen).format('MMM D, YYYY HH:mm'),
       width: '15%'
     }
   ], []);
@@ -165,11 +161,10 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
             pageSizeOptions: [10, 25, 50, 100],
             sorting: true,
             filtering: true,
-            selection: true,
             headerStyle: {
               fontWeight: 'bold'
             },
-            rowStyle: (rowData) => ({
+            rowStyle: (rowData: Visitor) => ({
               backgroundColor: rowData.status === VisitorStatus.IDENTIFIED ? '#f3f9ff' : 'inherit'
             }),
             maxBodyHeight: 'calc(100vh - 300px)',
@@ -178,7 +173,6 @@ export const VisitorTable = React.memo<VisitorTableProps>(({
             searchAutoFocus: false
           }}
           onRowClick={handleRowClick}
-          onSelectionChange={(rows) => setSelectedRows(rows)}
           onSearchChange={handleSearch}
           actions={[
             {

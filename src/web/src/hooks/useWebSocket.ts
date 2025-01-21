@@ -24,6 +24,7 @@ interface ConnectionStats {
   reconnectAttempts: number;
   messageCount: number;
   errorCount: number;
+  isConnected: boolean;
 }
 
 /**
@@ -39,14 +40,15 @@ interface SubscriptionOptions {
  * Enhanced WebSocket hook with performance monitoring and reliability features
  */
 export const useWebSocket = () => {
-  const { isAuthenticated, getAuthToken } = useAuth();
+  const { isAuthenticated } = useAuth();
   const wsService = useRef<WebSocketService | null>(null);
   const statsRef = useRef<ConnectionStats>({
     latency: 0,
     lastActivity: Date.now(),
     reconnectAttempts: 0,
     messageCount: 0,
-    errorCount: 0
+    errorCount: 0,
+    isConnected: false
   });
   const isConnectedRef = useRef<boolean>(false);
 
@@ -55,14 +57,12 @@ export const useWebSocket = () => {
    */
   const initializeWebSocket = useCallback(async () => {
     if (!wsService.current) {
-      wsService.current = WebSocketService;
-      wsService.current.setConnectionPool(CONNECTION_POOL_SIZE);
+      wsService.current = new WebSocketService();
     }
 
     if (isAuthenticated) {
       try {
-        const token = await getAuthToken();
-        await wsService.current.connect(token);
+        await wsService.current.connect('');
         isConnectedRef.current = true;
         statsRef.current.reconnectAttempts = 0;
       } catch (error) {
@@ -71,7 +71,7 @@ export const useWebSocket = () => {
         handleReconnection();
       }
     }
-  }, [isAuthenticated, getAuthToken]);
+  }, [isAuthenticated]);
 
   /**
    * Handle WebSocket reconnection with exponential backoff
@@ -108,7 +108,8 @@ export const useWebSocket = () => {
       }
 
       // Subscribe with performance tracking
-      await wsService.current.subscribe(event, (data: any) => {
+      const eventEmitter = wsService.current.getEventEmitter();
+      eventEmitter.on(event, (data: any) => {
         statsRef.current.messageCount++;
         statsRef.current.lastActivity = Date.now();
         
@@ -120,7 +121,7 @@ export const useWebSocket = () => {
         }
 
         callback(data);
-      }, options);
+      });
 
       return {
         success: true,
@@ -144,7 +145,8 @@ export const useWebSocket = () => {
     }
 
     try {
-      await wsService.current.unsubscribe(event, callback);
+      const eventEmitter = wsService.current.getEventEmitter();
+      eventEmitter.off(event, callback);
       return { success: true };
     } catch (error) {
       statsRef.current.errorCount++;
@@ -157,8 +159,7 @@ export const useWebSocket = () => {
    */
   const emit = useCallback(async (
     event: string,
-    data: any,
-    options: { timeout?: number } = {}
+    data: any
   ): Promise<{ success: boolean; latency?: number }> => {
     if (!wsService.current || !isConnectedRef.current) {
       throw new Error('WebSocket not connected');
@@ -167,7 +168,8 @@ export const useWebSocket = () => {
     const startTime = performance.now();
 
     try {
-      await wsService.current.emit(event, data);
+      const eventEmitter = wsService.current.getEventEmitter();
+      eventEmitter.emit(event, data);
       const latency = performance.now() - startTime;
       
       if (latency > LATENCY_THRESHOLD) {
@@ -186,8 +188,7 @@ export const useWebSocket = () => {
    */
   const getConnectionStats = useCallback((): ConnectionStats => {
     return {
-      ...statsRef.current,
-      isConnected: isConnectedRef.current
+      ...statsRef.current
     };
   }, []);
 

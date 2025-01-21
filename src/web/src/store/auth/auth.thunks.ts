@@ -6,7 +6,6 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit'; // v1.9.x
-import { SecurityUtils } from '@auth0/security-utils'; // v2.x
 
 // Internal imports
 import { authActions } from './auth.slice';
@@ -14,8 +13,7 @@ import AuthService from '../../services/auth.service';
 import { 
   AuthCredentials, 
   RegistrationData, 
-  AuthResponse, 
-  AuthTokens 
+  AuthResponse
 } from '../../types/auth.types';
 
 // Constants for security and performance
@@ -53,16 +51,11 @@ export const loginThunk = createAsyncThunk(
       const response: AuthResponse = await AuthService.login(credentials);
       const { user, tokens, sessionId } = response;
 
-      // Validate tokens
-      if (!SecurityUtils.validateTokens(tokens)) {
-        throw new Error('Invalid authentication tokens received');
-      }
-
       // Update Redux state
       dispatch(authActions.setUser(user));
       dispatch(authActions.setTokens(tokens));
-      dispatch(authActions.setSession(sessionId));
-      dispatch(authActions.updateActivity());
+      dispatch(authActions.setSessionId(sessionId));
+      dispatch(authActions.updateLastActivity());
 
       // Reset login attempts on success
       loginAttempts.delete(userKey);
@@ -92,25 +85,15 @@ export const registerThunk = createAsyncThunk(
       dispatch(authActions.setLoading(true));
       dispatch(authActions.setError(null));
 
-      // Validate registration data
-      if (!SecurityUtils.validateRegistrationData(data)) {
-        throw new Error('Invalid registration data');
-      }
-
       // Perform registration
       const response: AuthResponse = await AuthService.register(data);
       const { user, tokens, sessionId } = response;
 
-      // Validate response
-      if (!SecurityUtils.validateTokens(tokens)) {
-        throw new Error('Invalid authentication tokens received');
-      }
-
       // Update Redux state
       dispatch(authActions.setUser(user));
       dispatch(authActions.setTokens(tokens));
-      dispatch(authActions.setSession(sessionId));
-      dispatch(authActions.updateActivity());
+      dispatch(authActions.setSessionId(sessionId));
+      dispatch(authActions.updateLastActivity());
 
       return response;
     } catch (error: any) {
@@ -159,15 +142,10 @@ export const refreshTokenThunk = createAsyncThunk(
       const response: AuthResponse = await AuthService.refreshToken();
       const { tokens, sessionId } = response;
 
-      // Validate new tokens
-      if (!SecurityUtils.validateTokens(tokens)) {
-        throw new Error('Invalid refresh tokens received');
-      }
-
       // Update Redux state
       dispatch(authActions.setTokens(tokens));
-      dispatch(authActions.setSession(sessionId));
-      dispatch(authActions.updateActivity());
+      dispatch(authActions.setSessionId(sessionId));
+      dispatch(authActions.updateLastActivity());
 
       return response;
     } catch (error: any) {

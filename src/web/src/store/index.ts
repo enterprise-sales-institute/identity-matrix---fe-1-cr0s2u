@@ -57,7 +57,7 @@ export const store = configureStore({
       return action;
     },
     // Sanitize state before logging
-    stateSanitizer: (state) => {
+    stateSanitizer: (state: RootState) => {
       if (state.auth?.tokens) {
         return {
           ...state,

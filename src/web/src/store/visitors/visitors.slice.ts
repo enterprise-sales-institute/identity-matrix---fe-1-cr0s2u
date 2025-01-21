@@ -1,6 +1,6 @@
 // @reduxjs/toolkit version 1.9.x
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Visitor, VisitorFilter, VisitorStatus } from '../../types/visitor.types';
+import { Visitor, VisitorFilter } from '../../types/visitor.types';
 
 /**
  * Interface defining the complete state structure for the visitors slice

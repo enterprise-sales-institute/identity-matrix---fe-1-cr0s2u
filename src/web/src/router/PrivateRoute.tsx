@@ -20,9 +20,9 @@ const PrivateRoute: FC<PropsWithChildren> = ({ children }): JSX.Element => {
   // Get authentication state and loading status from auth hook
   const { isAuthenticated, loading } = useAuth();
 
-  // Show nothing while checking authentication status
+  // Show empty fragment while checking authentication status
   if (loading) {
-    return null;
+    return <></>;
   }
 
   // Redirect to login page if user is not authenticated

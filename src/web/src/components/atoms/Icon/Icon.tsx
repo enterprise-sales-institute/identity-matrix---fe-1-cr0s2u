@@ -16,7 +16,7 @@ export interface IconProps {
   /** Whether the icon is disabled */
   disabled?: boolean;
   /** Optional click handler with event type safety */
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (event: React.MouseEvent<HTMLSpanElement>) => void;
   /** Optional CSS class name */
   className?: string;
   /** Accessible label for screen readers */
@@ -43,23 +43,13 @@ export const Icon: React.FC<IconProps> = React.memo(({
   testId = 'icon',
 }) => {
   /**
-   * Validates color contrast against theme if custom color is provided
-   */
-  const validateColorContrast = useCallback((theme: ThemeConfig, customColor?: string) => {
-    if (!customColor) return true;
-    // Color contrast validation would go here
-    // This is a placeholder for actual contrast calculation
-    return true;
-  }, []);
-
-  /**
    * Handles keyboard interactions for accessibility
    */
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (disabled) return;
     if (onClick && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault();
-      onClick(event as unknown as React.MouseEvent<HTMLDivElement>);
+      onClick(event as unknown as React.MouseEvent<HTMLSpanElement>);
     }
   }, [disabled, onClick]);
 

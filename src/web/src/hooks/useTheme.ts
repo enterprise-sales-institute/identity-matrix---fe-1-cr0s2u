@@ -8,14 +8,12 @@ import {
   setStoredTheme,
   getThemeConfig,
   isDarkTheme,
-  systemPrefersDark,
   validateColorContrast
 } from '../utils/theme.util';
 
 // Constants for theme management
 const THEME_TRANSITION_DURATION = 300; // milliseconds
 const STORAGE_QUOTA_THRESHOLD = 5242880; // 5MB
-const THEME_ERROR_RETRY_LIMIT = 3;
 
 /**
  * Custom hook for managing application theme with enhanced features
@@ -49,10 +47,10 @@ export const useTheme = () => {
     
     // Apply theme-specific CSS variables
     Object.entries(theme.colors).forEach(([category, values]) => {
-      Object.entries(values).forEach(([key, value]) => {
+      Object.entries(values).forEach(([key, colorValue]) => {
         document.documentElement.style.setProperty(
           `--color-${category}-${key}`,
-          value
+          String(colorValue)
         );
       });
     });
@@ -105,8 +103,9 @@ export const useTheme = () => {
       setThemeError(null);
 
       // Track theme change analytics
-      if (window.gtag) {
-        window.gtag('event', 'theme_change', {
+      const gtagFunction = (window as any).gtag;
+      if (gtagFunction) {
+        gtagFunction('event', 'theme_change', {
           theme_mode: newMode,
           timestamp: new Date().toISOString()
         });

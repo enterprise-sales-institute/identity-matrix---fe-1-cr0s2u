@@ -5,8 +5,8 @@
  */
 
 import styled from 'styled-components'; // v5.x
-import { CardContainer as BaseCard } from '../../atoms/Card/Card';
-import { colors, typography, spacing, breakpoints } from '../../../styles/variables.styles';
+import { CardContainer as BaseCard } from '../../atoms/Card/Card.styles';
+import { colors, typography, breakpoints } from '../../../styles/variables.styles';
 
 // Constants for component styling
 const CARD_PADDING = 'var(--spacing-base, 8px)';

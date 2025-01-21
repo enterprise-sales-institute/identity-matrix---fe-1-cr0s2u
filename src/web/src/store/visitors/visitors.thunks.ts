@@ -2,14 +2,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Internal imports
-import { actions } from './visitors.slice';
+import { 
+  setVisitors, 
+  setLoading, 
+  setError, 
+  setSelectedVisitor,
+  updateVisitor as updateVisitorAction,
+  updateVisitorSuccess,
+  updateVisitorFailure
+} from './visitors.slice';
 import VisitorService from '../../services/visitor.service';
 import { Visitor, VisitorFilter } from '../../types/visitor.types';
-
-// Constants for request handling
-const CACHE_KEY = 'visitors-cache';
-const DEBOUNCE_MS = 300;
-const MAX_RETRIES = 3;
 
 /**
  * Async thunk for fetching visitors with filtering, caching, and real-time updates
@@ -18,23 +21,23 @@ export const fetchVisitors = createAsyncThunk(
   'visitors/fetchVisitors',
   async (filter: VisitorFilter, { dispatch, rejectWithValue }) => {
     try {
-      dispatch(actions.setLoading(true));
+      dispatch(setLoading(true));
 
       // Fetch visitors with caching enabled
       const visitors = await VisitorService.getVisitors(filter, true);
 
       // Update state with fetched visitors
-      dispatch(actions.setVisitors({
+      dispatch(setVisitors({
         visitors,
         total: visitors.length
       }));
 
       return visitors;
     } catch (error: any) {
-      dispatch(actions.setError(error.message));
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
-      dispatch(actions.setLoading(false));
+      dispatch(setLoading(false));
     }
   }
 );
@@ -46,20 +49,20 @@ export const fetchVisitorById = createAsyncThunk(
   'visitors/fetchVisitorById',
   async (visitorId: string, { dispatch, rejectWithValue }) => {
     try {
-      dispatch(actions.setLoading(true));
+      dispatch(setLoading(true));
 
       // Fetch single visitor
       const visitor = await VisitorService.getVisitorById(visitorId);
 
       // Update selected visitor in state
-      dispatch(actions.setSelectedVisitor(visitor));
+      dispatch(setSelectedVisitor(visitor));
 
       return visitor;
     } catch (error: any) {
-      dispatch(actions.setError(error.message));
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
-      dispatch(actions.setLoading(false));
+      dispatch(setLoading(false));
     }
   }
 );
@@ -71,30 +74,35 @@ export const fetchVisitorsByCompany = createAsyncThunk(
   'visitors/fetchVisitorsByCompany',
   async (
     { companyId, filter }: { companyId: string; filter: VisitorFilter },
-    { dispatch, rejectWithValue }
+    { dispatch, getState, rejectWithValue }
   ) => {
     try {
-      dispatch(actions.setLoading(true));
+      dispatch(setLoading(true));
+
+      // Get current page and page size from state
+      const state = getState() as any;
+      const currentPage = state.visitors.currentPage;
+      const pageSize = state.visitors.pageSize;
 
       // Fetch company visitors with pagination
       const response = await VisitorService.getVisitorsByCompany(
         companyId,
-        filter.page || 1,
-        filter.pageSize || 25
+        currentPage,
+        pageSize
       );
 
       // Update state with company visitors
-      dispatch(actions.setVisitors({
+      dispatch(setVisitors({
         visitors: response.visitors,
         total: response.total
       }));
 
       return response.visitors;
     } catch (error: any) {
-      dispatch(actions.setError(error.message));
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
-      dispatch(actions.setLoading(false));
+      dispatch(setLoading(false));
     }
   }
 );
@@ -107,18 +115,18 @@ export const updateVisitor = createAsyncThunk(
   async (visitor: Visitor, { dispatch, rejectWithValue }) => {
     try {
       // Optimistically update the visitor in state
-      dispatch(actions.updateVisitor(visitor));
+      dispatch(updateVisitorAction(visitor));
 
       // Attempt to update on the server
       const updatedVisitor = await VisitorService.updateVisitor(visitor);
 
       // Confirm successful update
-      dispatch(actions.updateVisitorSuccess(visitor.id));
+      dispatch(updateVisitorSuccess(visitor.id));
 
       return updatedVisitor;
     } catch (error: any) {
       // Rollback optimistic update on failure
-      dispatch(actions.updateVisitorFailure({
+      dispatch(updateVisitorFailure({
         visitorId: visitor.id,
         error: error.message
       }));
@@ -137,7 +145,7 @@ export const exportVisitors = createAsyncThunk(
     { dispatch, rejectWithValue }
   ) => {
     try {
-      dispatch(actions.setLoading(true));
+      dispatch(setLoading(true));
 
       // Export visitor data
       const blob = await VisitorService.exportVisitors(filter, format);
@@ -154,10 +162,10 @@ export const exportVisitors = createAsyncThunk(
 
       return true;
     } catch (error: any) {
-      dispatch(actions.setError(error.message));
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
-      dispatch(actions.setLoading(false));
+      dispatch(setLoading(false));
     }
   }
 );
@@ -169,23 +177,23 @@ export const searchVisitors = createAsyncThunk(
   'visitors/searchVisitors',
   async (query: string, { dispatch, rejectWithValue }) => {
     try {
-      dispatch(actions.setLoading(true));
+      dispatch(setLoading(true));
 
       // Search visitors with debouncing
       const visitors = await VisitorService.searchVisitors(query);
 
       // Update state with search results
-      dispatch(actions.setVisitors({
+      dispatch(setVisitors({
         visitors,
         total: visitors.length
       }));
 
       return visitors;
     } catch (error: any) {
-      dispatch(actions.setError(error.message));
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
-      dispatch(actions.setLoading(false));
+      dispatch(setLoading(false));
     }
   }
 );

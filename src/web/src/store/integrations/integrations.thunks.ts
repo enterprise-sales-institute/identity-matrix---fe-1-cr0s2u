@@ -19,12 +19,10 @@ import {
   clearError 
 } from './integrations.slice';
 import { 
-  Integration, 
   IntegrationCreatePayload, 
   IntegrationUpdatePayload, 
   IntegrationStatus 
 } from '../../types/integration.types';
-import { UserRole } from '../../types/auth.types';
 
 // Constants
 const MAX_RETRIES = 3;
@@ -35,13 +33,13 @@ const RETRY_DELAY = 1000;
  */
 export const fetchIntegrations = createAsyncThunk(
   'integrations/fetchIntegrations',
-  async (companyId: string, { dispatch, getState, rejectWithValue }) => {
+  async (companyId: string, { dispatch, rejectWithValue }) => {
     try {
       dispatch(clearError());
       dispatch(setLoading(true));
 
       // Configure retry strategy
-      retry(IntegrationService.instance, {
+      retry(IntegrationService, {
         retries: MAX_RETRIES,
         retryDelay: (retryCount) => retryCount * RETRY_DELAY,
         retryCondition: (error) => {
@@ -71,7 +69,7 @@ export const fetchIntegrations = createAsyncThunk(
  */
 export const createIntegration = createAsyncThunk(
   'integrations/createIntegration',
-  async (payload: IntegrationCreatePayload, { dispatch, getState, rejectWithValue }) => {
+  async (payload: IntegrationCreatePayload, { dispatch, rejectWithValue }) => {
     try {
       dispatch(clearError());
       dispatch(setLoading(true));
@@ -103,7 +101,7 @@ export const updateIntegrationThunk = createAsyncThunk(
   }: { 
     integrationId: string; 
     payload: IntegrationUpdatePayload 
-  }, { dispatch, getState, rejectWithValue }) => {
+  }, { dispatch, rejectWithValue }) => {
     try {
       dispatch(clearError());
       dispatch(setLoading(true));
@@ -133,7 +131,7 @@ export const updateIntegrationThunk = createAsyncThunk(
  */
 export const deleteIntegration = createAsyncThunk(
   'integrations/deleteIntegration',
-  async (integrationId: string, { dispatch, getState, rejectWithValue }) => {
+  async (integrationId: string, { dispatch, rejectWithValue }) => {
     try {
       dispatch(clearError());
       dispatch(setLoading(true));
@@ -174,8 +172,9 @@ export const syncIntegration = createAsyncThunk(
       const result = await IntegrationService.syncIntegration(integrationId, { force });
       
       // Update integration status based on sync result
+      const state = getState() as { integrations: { integrations: Record<string, any> } };
       dispatch(updateIntegration({
-        ...getState().integrations.integrations[integrationId],
+        ...state.integrations.integrations[integrationId],
         status: result.status === 'success' ? 
           IntegrationStatus.ACTIVE : 
           IntegrationStatus.ERROR,
@@ -210,8 +209,9 @@ export const verifyIntegration = createAsyncThunk(
       const isValid = await IntegrationService.verifyIntegration(integrationId);
       
       if (isValid) {
+        const state = getState() as { integrations: { integrations: Record<string, any> } };
         dispatch(updateIntegration({
-          ...getState().integrations.integrations[integrationId],
+          ...state.integrations.integrations[integrationId],
           status: IntegrationStatus.ACTIVE
         }));
       }

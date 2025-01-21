@@ -5,7 +5,7 @@ import { colors, spacing, breakpoints, typography } from '../../../styles/variab
 const FORM_SPACING = parseInt(spacing.baseUnit) * 3;
 const INPUT_MARGIN = parseInt(spacing.baseUnit) * 2;
 const MOBILE_PADDING = parseInt(spacing.baseUnit);
-const HEADER_FONT_SIZE = parseInt(typography.fontSize['2xl']);
+const HEADER_FONT_SIZE = parseFloat(typography.fontSize['2xl']) * 16;
 const LINK_TRANSITION = '0.2s ease-in-out';
 
 /**
@@ -52,7 +52,7 @@ export const LoginHeader = styled.div`
     font-family: ${typography.fontFamilyHeading};
     font-size: ${HEADER_FONT_SIZE}px;
     font-weight: ${typography.fontWeight.semibold};
-    margin-bottom: ${spacing.baseUnit}px;
+    margin-bottom: ${spacing.baseUnit};
   }
 
   @media (max-width: ${breakpoints.mobile}) {
@@ -70,7 +70,7 @@ export const RememberMeContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: ${spacing.baseUnit}px 0;
+  margin: ${spacing.baseUnit} 0;
   font-family: ${typography.fontFamilyBody};
   font-size: ${typography.fontSize.sm};
 
@@ -108,7 +108,7 @@ export const ActionContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${spacing.baseUnit * 2}px;
+  gap: ${parseInt(spacing.baseUnit) * 2}px;
   margin-top: ${FORM_SPACING}px;
   font-family: ${typography.fontFamilyBody};
 
@@ -142,6 +142,6 @@ export const ActionContainer = styled.div`
 
   @media (max-width: ${breakpoints.mobile}) {
     margin-top: ${FORM_SPACING * 0.75}px;
-    gap: ${spacing.baseUnit}px;
+    gap: ${parseInt(spacing.baseUnit)}px;
   }
 `;

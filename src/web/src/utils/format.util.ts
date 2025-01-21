@@ -7,14 +7,10 @@
 import numeral from 'numeral'; // v2.0.x
 import { memoize } from 'lodash'; // v4.17.x
 import { VisitorLocation } from '../types/visitor.types';
-import { formatDate } from './date.util';
 
 // Global constants for formatting patterns
 const DEFAULT_NUMBER_FORMAT = '0,0';
-const DEFAULT_CURRENCY_FORMAT = '$0,0.00';
-const DEFAULT_PERCENTAGE_FORMAT = '0.0%';
 const DEFAULT_TRUNCATE_LENGTH = 50;
-const FORMAT_CACHE_SIZE = 100;
 
 // Type guards
 const isValidNumber = (value: any): value is number => 
@@ -41,7 +37,7 @@ export const formatNumber = memoize(
       return '—';
     }
   },
-  (value, format) => `${value}-${format}`
+  (value: number | null | undefined, format: string) => `${value}-${format}`
 );
 
 /**
@@ -69,7 +65,7 @@ export const formatCurrency = memoize(
       return '—';
     }
   },
-  (value, symbol, locale) => `${value}-${symbol}-${locale}`
+  (value: number | null | undefined, symbol: string, locale: string) => `${value}-${symbol}-${locale}`
 );
 
 /**
@@ -93,7 +89,7 @@ export const formatPercentage = memoize(
       return '—';
     }
   },
-  (value, precision) => `${value}-${precision}`
+  (value: number | null | undefined, precision: number) => `${value}-${precision}`
 );
 
 /**
@@ -113,7 +109,7 @@ export const formatAddress = memoize(
         isValidString(city) ? city : null,
         isValidString(region) ? region : null,
         isValidString(country) ? country : null
-      ].filter(Boolean);
+      ].filter((component): component is string => component !== null);
 
       if (components.length === 0) return '—';
 
@@ -129,7 +125,7 @@ export const formatAddress = memoize(
       return '—';
     }
   },
-  (location, locale) => `${JSON.stringify(location)}-${locale}`
+  (location: VisitorLocation | null | undefined, locale: string) => `${JSON.stringify(location)}-${locale}`
 );
 
 /**
@@ -165,6 +161,6 @@ export const truncateString = memoize(
       return value || '';
     }
   },
-  (value, maxLength, respectWordBoundary) => 
+  (value: string | null | undefined, maxLength: number, respectWordBoundary: boolean) => 
     `${value}-${maxLength}-${respectWordBoundary}`
 );

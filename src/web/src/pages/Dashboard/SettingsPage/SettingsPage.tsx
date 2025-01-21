@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import debounce from 'lodash'; // v4.x
+import { debounce } from 'lodash'; // v4.x
 
 // Internal imports
 import DashboardLayout from '../../../components/templates/DashboardLayout/DashboardLayout';

@@ -44,7 +44,7 @@ export const IntegrationCard = React.memo<IntegrationCardProps>(({
   className,
   testId = 'integration-card'
 }) => {
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,7 +104,6 @@ export const IntegrationCard = React.memo<IntegrationCardProps>(({
 
   // Determine button states based on integration status
   const isConnected = integration.status === IntegrationStatus.ACTIVE;
-  const isPending = integration.status === IntegrationStatus.PENDING;
   const hasError = integration.status === IntegrationStatus.ERROR;
 
   return (
@@ -139,7 +138,7 @@ export const IntegrationCard = React.memo<IntegrationCardProps>(({
           <p
             role="alert"
             aria-live="polite"
-            style={{ color: theme.colors.text.error }}
+            style={{ color: theme.colors.text.primary }}
           >
             {error}
           </p>

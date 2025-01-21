@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion'; // v6.x
-import { ErrorBoundary } from 'react-error-boundary'; // v4.x
+import { AnimatePresence } from 'framer-motion';
+import { ErrorBoundary } from 'react-error-boundary';
 
 // Lazy loaded components with route-based code splitting
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -122,14 +122,12 @@ const Router: React.FC = () => {
         const prevRoute = protectedRoutes[currentIndex - 1];
 
         if (nextRoute) {
-          const module = await nextRoute.component;
-          // Prefetch next route
+          await nextRoute.component;
           console.log('Prefetching:', nextRoute.path);
         }
 
         if (prevRoute) {
-          const module = await prevRoute.component;
-          // Prefetch previous route
+          await prevRoute.component;
           console.log('Prefetching:', prevRoute.path);
         }
       }
@@ -147,10 +145,10 @@ const Router: React.FC = () => {
         <ScrollToTop />
         <RouteTracker />
         
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <Routes location={location} key={location.pathname}>
             {/* Public Routes */}
-            {publicRoutes.map(({ path, component: Component, meta }) => (
+            {publicRoutes.map(({ path, component: Component }) => (
               <Route
                 key={path}
                 path={path}
@@ -163,7 +161,7 @@ const Router: React.FC = () => {
             ))}
 
             {/* Protected Routes */}
-            {protectedRoutes.map(({ path, component: Component, meta }) => (
+            {protectedRoutes.map(({ path, component: Component }) => (
               <Route
                 key={path}
                 path={path}

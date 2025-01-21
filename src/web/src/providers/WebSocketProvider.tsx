@@ -85,7 +85,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   batchSize = DEFAULT_BATCH_SIZE,
   reconnectOptions = DEFAULT_RECONNECT_OPTIONS
 }) => {
-  const { isAuthenticated, token, validateSession } = useAuth();
+  const { isAuthenticated, user, validateSession } = useAuth();
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   const [connectionError, setConnectionError] = useState<Error | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
@@ -96,9 +96,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
    * Initialize WebSocket service with enhanced features
    */
   useEffect(() => {
-    wsService.current.setConnectionPool(poolSize);
-    wsService.current.enableEventBatching(batchSize);
-
     return () => {
       disconnect();
     };
@@ -108,13 +105,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
    * Connect to WebSocket server with authentication
    */
   const connect = useCallback(async () => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated || !user) {
       throw new Error('Authentication required for WebSocket connection');
     }
 
     try {
       setConnectionStatus(ConnectionStatus.CONNECTING);
-      await wsService.current.connect(token);
+      await wsService.current.connect(user.id);
       setConnectionStatus(ConnectionStatus.CONNECTED);
       setConnectionError(null);
       setReconnectAttempts(0);
@@ -123,7 +120,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       setConnectionError(error as Error);
       handleReconnection();
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, user]);
 
   /**
    * Disconnect from WebSocket server

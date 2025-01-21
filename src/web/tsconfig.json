@@ -8,26 +8,21 @@
       "ESNext"
     ],
     "module": "ESNext",
-
     // Module Resolution and Import Configuration
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-
     // Emit Configuration
     "noEmit": true,
     "jsx": "react-jsx",
-
     // Type Checking Configuration
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-
     // Path Configuration
     "baseUrl": ".",
     "paths": {
@@ -44,7 +39,6 @@
       "@constants/*": ["src/constants/*"],
       "@types/*": ["src/types/*"]
     },
-
     // Type Definitions
     "types": [
       "vite/client",
@@ -52,14 +46,12 @@
       "@testing-library/jest-dom"
     ]
   },
-
   // File Inclusion/Exclusion
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",
-    "vite.config.ts",
-    "jest.config.ts"
+    "vite.config.ts"
   ],
   "exclude": [
     "node_modules",
@@ -70,12 +62,5 @@
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx"
-  ],
-
-  // Project References
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
   ]
 }

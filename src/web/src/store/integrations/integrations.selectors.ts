@@ -6,7 +6,6 @@
 
 import { createSelector } from '@reduxjs/toolkit'; // v1.9.x
 import type { RootState } from '../index';
-import type { Integration } from '../../types/integration.types';
 
 /**
  * Base selector to access the integrations state slice

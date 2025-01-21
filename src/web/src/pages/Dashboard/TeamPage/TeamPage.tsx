@@ -15,7 +15,6 @@ import { TeamRole, TeamMemberStatus } from '../../../types/team.types';
 const TeamPage: React.FC = React.memo(() => {
   // State management
   const {
-    members,
     loading,
     error,
     updateMember,
@@ -49,7 +48,8 @@ const TeamPage: React.FC = React.memo(() => {
         newRole,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       analytics.track('team_role_change_failed', {
         memberId,
         newRole,
@@ -84,7 +84,8 @@ const TeamPage: React.FC = React.memo(() => {
         newStatus,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       analytics.track('team_status_change_failed', {
         memberId,
         newStatus,
@@ -111,7 +112,8 @@ const TeamPage: React.FC = React.memo(() => {
         memberId,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       analytics.track('team_member_removal_failed', {
         memberId,
         error: error.message,
@@ -124,7 +126,7 @@ const TeamPage: React.FC = React.memo(() => {
   /**
    * Error boundary fallback component
    */
-  const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
     <div role="alert" className="error-container">
       <h2>Something went wrong:</h2>
       <pre>{error.message}</pre>

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom'; // v6.x
-import { colors, spacing, typography } from '../../../styles/variables.styles';
+import { colors, spacing, breakpoints, typography } from '../../../styles/variables.styles';
 
 // Animation and interaction constants
 const TRANSITION_DURATION = '0.2s';
@@ -26,7 +26,7 @@ export const NavigationItemContainer = styled.div<{ dir?: 'ltr' | 'rtl' }>`
     theme.mode === 'dark' ? colors.background.dark : colors.background.light};
 
   /* Responsive adjustments */
-  ${spacing.mediaQueries.mobile} {
+  ${breakpoints.mediaQueries.mobile} {
     padding: ${spacing.space.sm};
     margin-block: calc(${spacing.space.xs});
   }

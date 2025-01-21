@@ -41,10 +41,14 @@ const renderApp = (): void => {
 renderApp();
 
 // Enable hot module replacement in development
-if (process.env.NODE_ENV === 'development' && module.hot) {
-  module.hot.accept('./App', () => {
-    renderApp();
-  });
+if (process.env.NODE_ENV === 'development') {
+  // Type-safe HMR check
+  const m = module as any;
+  if (m.hot) {
+    m.hot.accept('./App', () => {
+      renderApp();
+    });
+  }
 }
 
 // Handle unhandled promise rejections

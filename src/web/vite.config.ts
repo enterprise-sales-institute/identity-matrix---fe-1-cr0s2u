@@ -7,8 +7,6 @@ export default defineConfig({
   // React plugin configuration with optimizations
   plugins: [
     react({
-      // Enable fast refresh for development
-      fastRefresh: true,
       // Babel configuration for optimal JSX transformation
       babel: {
         plugins: [

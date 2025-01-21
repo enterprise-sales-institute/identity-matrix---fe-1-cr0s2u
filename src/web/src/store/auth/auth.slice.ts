@@ -16,7 +16,7 @@ const initialState: AuthState = {
   tokens: null,
   loading: false,
   error: null,
-  lastActivity: null,
+  lastActivity: new Date(),
   sessionId: null
 };
 
@@ -34,7 +34,7 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
       if (action.payload) {
-        state.lastActivity = Date.now();
+        state.lastActivity = new Date();
       }
     },
 
@@ -50,14 +50,14 @@ const authSlice = createSlice({
         }
       }
       state.tokens = action.payload;
-      state.lastActivity = Date.now();
+      state.lastActivity = new Date();
     },
 
     /**
      * Update session activity timestamp
      */
     updateLastActivity: (state) => {
-      state.lastActivity = Date.now();
+      state.lastActivity = new Date();
     },
 
     /**
@@ -69,7 +69,7 @@ const authSlice = createSlice({
         return;
       }
       state.sessionId = action.payload;
-      state.lastActivity = Date.now();
+      state.lastActivity = new Date();
     },
 
     /**
@@ -99,7 +99,7 @@ const authSlice = createSlice({
       state.user = null;
       state.tokens = null;
       state.sessionId = null;
-      state.lastActivity = null;
+      state.lastActivity = new Date();
       state.error = null;
       state.loading = false;
     }

@@ -44,13 +44,11 @@ interface SyncResult {
  */
 export class IntegrationService {
   private readonly apiInstance = ApiService.instance;
-  private readonly maxRetries: number;
   private readonly syncStatus: Map<string, IntegrationStatus>;
   private readonly cache: Map<string, { data: Integration[]; timestamp: number }>;
   private readonly CACHE_DURATION = 300000; // 5 minutes
 
-  constructor(maxRetries: number = 3) {
-    this.maxRetries = maxRetries;
+  constructor() {
     this.syncStatus = new Map();
     this.cache = new Map();
   }
@@ -79,6 +77,21 @@ export class IntegrationService {
       return response.data;
     } catch (error) {
       console.error('Failed to fetch integrations:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves a single integration by ID
+   */
+  public async getIntegrationById(integrationId: string): Promise<Integration> {
+    try {
+      const response: AxiosResponse<Integration> = await this.apiInstance.get(
+        API_ENDPOINTS.INTEGRATIONS.BY_ID.replace(':id', integrationId)
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch integration:', error);
       throw error;
     }
   }
@@ -121,6 +134,35 @@ export class IntegrationService {
   }
 
   /**
+   * Deletes an integration by ID
+   */
+  public async deleteIntegration(integrationId: string): Promise<void> {
+    try {
+      await this.apiInstance.delete(
+        API_ENDPOINTS.INTEGRATIONS.BY_ID.replace(':id', integrationId)
+      );
+    } catch (error) {
+      console.error('Failed to delete integration:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Tests integration connectivity with enhanced error handling
+   */
+  public async testIntegrationConnection(integrationId: string): Promise<boolean> {
+    try {
+      const response: AxiosResponse<{ success: boolean }> = await this.apiInstance.post(
+        `${API_ENDPOINTS.INTEGRATIONS.CONNECT}/${integrationId}/test`
+      );
+      return response.data.success;
+    } catch (error) {
+      console.error('Integration connection test failed:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Triggers manual sync for an integration with progress tracking
    */
   public async syncIntegration(
@@ -144,6 +186,22 @@ export class IntegrationService {
     } catch (error) {
       this.syncStatus.set(integrationId, IntegrationStatus.ERROR);
       console.error('Integration sync failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retries a failed operation with exponential backoff
+   */
+  public async retryOperation(integrationId: string, operationType: string): Promise<boolean> {
+    try {
+      const response: AxiosResponse<{ success: boolean }> = await this.apiInstance.post(
+        `${API_ENDPOINTS.INTEGRATIONS.BY_ID.replace(':id', integrationId)}/retry`,
+        { operationType }
+      );
+      return response.data.success;
+    } catch (error) {
+      console.error('Retry operation failed:', error);
       throw error;
     }
   }

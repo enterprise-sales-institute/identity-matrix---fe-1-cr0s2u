@@ -39,7 +39,19 @@ const LETTER_SPACING = {
   tight: '-0.02em',
   normal: '0',
   wide: '0.02em'
-};
+} as const;
+
+type LetterSpacingType = keyof typeof LETTER_SPACING;
+
+interface FontStylesProps {
+  family: string;
+  fallback: string;
+  size: string;
+  lineHeight: number;
+  weight?: number;
+  letterSpacing?: LetterSpacingType;
+  isHeading?: boolean;
+}
 
 /**
  * Creates consistent font styles with specified properties and responsive scaling
@@ -52,7 +64,7 @@ const createFontStyles = ({
   weight = 400,
   letterSpacing = 'normal',
   isHeading = false
-}) => css`
+}: FontStylesProps) => css`
   font-family: ${family}, ${fallback};
   font-size: ${size};
   line-height: ${lineHeight};

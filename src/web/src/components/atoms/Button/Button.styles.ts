@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { colors, spacing } from '../../styles/variables.styles';
+import { colors, spacing, typography } from '../../styles/variables.styles';
 
 /**
  * Interface for styled button component props
@@ -112,7 +112,7 @@ export const StyledButton = styled.button<ButtonStyleProps>`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  font-family: ${props => props.theme.typography?.fontFamilyBody};
+  font-family: ${props => props.theme.typography?.fontFamily || typography.fontFamilyBody};
   font-weight: 500;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   transition: all 0.2s ease-in-out;

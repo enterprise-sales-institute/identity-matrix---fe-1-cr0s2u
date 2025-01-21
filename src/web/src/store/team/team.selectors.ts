@@ -6,7 +6,7 @@
 
 import { createSelector } from '@reduxjs/toolkit'; // v1.9.x
 import { RootState } from '../index';
-import { TeamMember, TeamRole, TeamMemberStatus } from '../../types/team.types';
+import { TeamRole, TeamMemberStatus } from '../../types/team.types';
 
 /**
  * Base selector to access team state slice

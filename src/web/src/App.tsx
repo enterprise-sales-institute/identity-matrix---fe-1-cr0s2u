@@ -5,14 +5,14 @@
  * ensuring proper component hierarchy and dependency management
  */
 
-import React, { FC, Suspense } from 'react'; // v18.x
-import { ErrorBoundary } from 'react-error-boundary'; // v4.0.0
+import { FC, Suspense } from 'react'; // v18.x
+import { ErrorBoundary, ErrorInfo } from 'react-error-boundary'; // v4.0.0
 
 // Internal imports
 import Router from './router/Router';
 import ThemeProvider from './providers/ThemeProvider';
 import AuthProvider from './providers/AuthProvider';
-import WebSocketProvider from './providers/WebSocketProvider';
+import { WebSocketProvider } from './providers/WebSocketProvider';
 
 /**
  * Error fallback component for top-level error boundary
@@ -52,7 +52,7 @@ const App: FC = () => {
    * @param error - Error object
    * @param info - Error information
    */
-  const handleError = (error: Error, info: { componentStack: string }) => {
+  const handleError = (error: Error, info: ErrorInfo) => {
     // Log error to monitoring service
     console.error('Application Error:', error);
     console.error('Component Stack:', info.componentStack);
@@ -67,7 +67,7 @@ const App: FC = () => {
         window.location.reload();
       }}
     >
-      <ThemeProvider defaultMode="light" useSystemTheme={true}>
+      <ThemeProvider defaultMode="dark" useSystemTheme={true}>
         <AuthProvider
           config={{
             refreshInterval: 4 * 60 * 1000, // 4 minutes
