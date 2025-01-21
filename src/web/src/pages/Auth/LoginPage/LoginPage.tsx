@@ -3,11 +3,11 @@ import { useNavigate, Link } from 'react-router-dom'; // v6.x
 import styled from 'styled-components'; // v5.x
 
 // Internal imports
-import AuthLayout from '../../components/templates/AuthLayout/AuthLayout';
-import FormGroup from '../../components/molecules/FormGroup/FormGroup';
-import Input from '../../components/atoms/Input/Input';
-import Button from '../../components/atoms/Button/Button';
-import { useAuth } from '../../hooks/useAuth';
+import AuthLayout from '../../../components/templates/AuthLayout/AuthLayout';
+import FormGroup from '../../../components/molecules/FormGroup/FormGroup';
+import Input from '../../../components/atoms/Input/Input';
+import Button from '../../../components/atoms/Button/Button';
+import { useAuth } from '../../../hooks/useAuth';
 import { colors, spacing } from '../../../styles/variables.styles';
 
 // Constants
