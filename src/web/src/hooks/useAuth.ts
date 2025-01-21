@@ -21,7 +21,8 @@ import {
 import { 
   AuthCredentials, 
   RegistrationData, 
-  AuthResponse 
+  AuthResponse,
+  UserProfile 
 } from '../types/auth.types';
 
 // Constants
@@ -127,6 +128,41 @@ export const useAuth = () => {
   }, [lastActivity, logout]);
 
   /**
+   * Profile update handler
+   */
+  const updateProfile = useCallback(async (profileData: Partial<UserProfile>) => {
+    try {
+      dispatch(authActions.setLoading(true));
+      const response = await AuthService.updateProfile(profileData);
+      dispatch(authActions.setUser(response.user));
+      return response;
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      dispatch(authActions.setError(error.message));
+      throw error;
+    } finally {
+      dispatch(authActions.setLoading(false));
+    }
+  }, [dispatch]);
+
+  /**
+   * Password update handler
+   */
+  const updatePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    try {
+      dispatch(authActions.setLoading(true));
+      const response = await AuthService.updatePassword(currentPassword, newPassword);
+      return response;
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      dispatch(authActions.setError(error.message));
+      throw error;
+    } finally {
+      dispatch(authActions.setLoading(false));
+    }
+  }, [dispatch]);
+
+  /**
    * Error clearing utility
    */
   const clearError = useCallback(() => {
@@ -180,7 +216,9 @@ export const useAuth = () => {
     logout,
     refreshToken,
     validateSession,
-    clearError
+    clearError,
+    updateProfile,
+    updatePassword
   };
 };
 
