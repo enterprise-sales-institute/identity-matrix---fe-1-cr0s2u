@@ -76,27 +76,6 @@ interface SecurityHeaders {
 }
 
 /**
- * Type-safe interface for API Headers
- */
-interface ApiHeaders {
-  readonly CONTENT_TYPE: string;
-  readonly ACCEPT: string;
-  readonly AUTHORIZATION: string;
-  readonly SECURITY: SecurityHeaders;
-}
-
-/**
- * Type-safe interface for HTTP Methods
- */
-interface HttpMethods {
-  readonly GET: string;
-  readonly POST: string;
-  readonly PUT: string;
-  readonly DELETE: string;
-  readonly PATCH: string;
-}
-
-/**
  * API Endpoints configuration object
  * @constant
  */
