@@ -3,11 +3,18 @@ import { debounce } from 'lodash'; // v4.17.21
 import { ErrorBoundary } from 'react-error-boundary'; // v4.0.11
 
 // Internal imports
-import DashboardLayout from '../../components/templates/DashboardLayout/DashboardLayout';
+import DashboardLayout from '../../../components/templates/DashboardLayout/DashboardLayout';
 import VisitorTable from '../../../components/organisms/VisitorTable/VisitorTable';
 import { useVisitorData } from '../../../hooks/useVisitorData';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 import { Visitor, VisitorFilter } from '../../../types/visitor.types';
+
+// Type declaration for gtag
+declare global {
+  interface Window {
+    gtag?: (command: string, action: string, params: any) => void;
+  }
+}
 
 /**
  * PulsePage component for real-time visitor tracking and lead generation
@@ -27,11 +34,6 @@ const PulsePage: React.FC = React.memo(() => {
 
   // Custom hooks for data management
   const {
-    visitors,
-    selectedVisitor,
-    loading,
-    error,
-    total,
     connectionStatus,
     fetchVisitors,
     selectVisitor,
@@ -97,14 +99,14 @@ const PulsePage: React.FC = React.memo(() => {
       if (window.gtag) {
         window.gtag('event', 'visitor_export', {
           filter_criteria: JSON.stringify(filter),
-          total_records: total
+          total_records: 0
         });
       }
     } catch (error) {
       console.error('Export error:', error);
       throw error;
     }
-  }, [filter, total]);
+  }, [filter]);
 
   /**
    * Setup real-time updates subscription
