@@ -6,7 +6,7 @@
  */
 
 // External imports
-import axios, { AxiosRequestConfig } from 'axios'; // axios@1.x
+import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'; // axios@1.x
 
 // Internal imports
 import { API_ENDPOINTS, API_HEADERS } from '../constants/api.constants';
@@ -22,6 +22,9 @@ const API_VERSION = 'v1';
 interface ExtendedAxiosConfig extends AxiosRequestConfig {
   retry?: number;
   retryDelay?: number;
+  metadata?: {
+    startTime: number;
+  };
 }
 
 /**
@@ -48,71 +51,64 @@ export const API_CONFIG: ExtendedAxiosConfig = {
 };
 
 /**
- * Creates a secure API configuration with authentication token
+ * Creates a secure API instance with authentication token
  * @param token - Authentication token for secure API requests
  * @returns Configured Axios instance with security measures
  */
-export const createApiConfig = (token?: string): ExtendedAxiosConfig => {
-  const config: ExtendedAxiosConfig = { ...API_CONFIG };
+export const createApiConfig = (token?: string) => {
+  const axiosInstance = axios.create({ ...API_CONFIG });
 
   // Add authentication header if token is provided
   if (token) {
-    config.headers = {
-      ...config.headers,
-      [API_HEADERS.AUTHORIZATION]: `${API_HEADERS.AUTHORIZATION} ${token}`
-    };
+    axiosInstance.defaults.headers.common[API_HEADERS.AUTHORIZATION] = `${API_HEADERS.AUTHORIZATION} ${token}`;
   }
 
   // Configure request interceptor for security and monitoring
-  config.interceptors = {
-    request: [
-      {
-        onFulfilled: (config) => {
-          // Add request timestamp for performance monitoring
-          config.metadata = { startTime: new Date().getTime() };
-          return config;
-        },
-        onRejected: (error) => {
-          return Promise.reject(error);
+  axiosInstance.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      // Add request timestamp for performance monitoring
+      config.metadata = { startTime: new Date().getTime() };
+      return config;
+    },
+    (error: Error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  // Configure response interceptor for monitoring and retry logic
+  axiosInstance.interceptors.response.use(
+    (response: AxiosResponse) => {
+      // Calculate response time for performance monitoring
+      const requestStartTime = response.config.metadata?.startTime;
+      if (requestStartTime) {
+        const responseTime = new Date().getTime() - requestStartTime;
+        // Log if response time exceeds threshold
+        if (responseTime > API_TIMEOUT) {
+          console.warn(`API response time exceeded threshold: ${responseTime}ms`);
         }
       }
-    ],
-    response: [
-      {
-        onFulfilled: (response) => {
-          // Calculate response time for performance monitoring
-          const requestStartTime = response.config.metadata?.startTime;
-          if (requestStartTime) {
-            const responseTime = new Date().getTime() - requestStartTime;
-            // Log if response time exceeds threshold
-            if (responseTime > API_TIMEOUT) {
-              console.warn(`API response time exceeded threshold: ${responseTime}ms`);
-            }
-          }
-          return response;
-        },
-        onRejected: async (error) => {
-          const config = error.config as ExtendedAxiosConfig;
-          
-          // Implement retry logic for failed requests
-          if (config.retry && config.retry > 0) {
-            config.retry--;
-            const delayMs = config.retryDelay || 100;
-            await new Promise(resolve => setTimeout(resolve, delayMs));
-            return axios(config);
-          }
-          
-          return Promise.reject(error);
-        }
+      return response;
+    },
+    async (error: Error & { config: ExtendedAxiosConfig }) => {
+      const config = error.config;
+      
+      // Implement retry logic for failed requests
+      if (config.retry && config.retry > 0) {
+        config.retry--;
+        const delayMs = config.retryDelay || 100;
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        return axios(config);
       }
-    ]
-  };
+      
+      return Promise.reject(error);
+    }
+  );
 
   // Configure CORS settings
-  config.xsrfCookieName = 'XSRF-TOKEN';
-  config.xsrfHeaderName = 'X-XSRF-TOKEN';
+  axiosInstance.defaults.xsrfCookieName = 'XSRF-TOKEN';
+  axiosInstance.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
 
-  return config;
+  return axiosInstance;
 };
 
 /**
