@@ -60,10 +60,3 @@ export const FORM_ERROR_MESSAGES = {
   invalidDomain: 'Please enter a valid domain name',
   maxLength: (field: string, max: number) => `${field} must not exceed ${max} characters`
 } as const;
-
-// Internal constants used for validation logic
-const MIN_PASSWORD_LENGTH = 12;
-const MAX_PASSWORD_LENGTH = 128;
-const MAX_EMAIL_LENGTH = 254;
-const MAX_COMPANY_NAME_LENGTH = 100;
-const MAX_DOMAIN_LENGTH = 253;
