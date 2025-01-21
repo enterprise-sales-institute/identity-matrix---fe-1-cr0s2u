@@ -5,18 +5,16 @@
  */
 
 // External imports
-import { AxiosResponse } from 'axios'; // axios@1.x
 import { debounce } from 'lodash'; // lodash@4.x
 
 // Internal imports
 import ApiService from './api.service';
-import { Visitor, VisitorFilter, VisitorStatus, VisitorMetadata, EnrichedData } from '../types/visitor.types';
+import { Visitor, VisitorFilter } from '../types/visitor.types';
 import { API_ENDPOINTS } from '../constants/api.constants';
 
 // Constants
 const CACHE_DURATION = 300000; // 5 minutes
 const REQUEST_TIMEOUT = 5000; // 5 seconds
-const MAX_RETRIES = 3;
 const DEBOUNCE_DELAY = 300; // 300ms for search debouncing
 
 /**
