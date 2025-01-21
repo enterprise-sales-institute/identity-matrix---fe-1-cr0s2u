@@ -3,7 +3,6 @@ import {
   ThemeConstants,
   ColorConstants,
   TypographyConstants,
-  SpacingConstants,
   BreakpointConstants
 } from '../constants/theme.constants';
 import type {
@@ -20,9 +19,9 @@ import type {
  */
 const baseTypography: Typography = {
   fontFamilies: {
-    heading: TypographyConstants.HEADING_FONT,
-    body: TypographyConstants.BODY_FONT,
-    code: TypographyConstants.CODE_FONT
+    heading: String(TypographyConstants.HEADING_FONT),
+    body: String(TypographyConstants.BODY_FONT),
+    code: String(TypographyConstants.CODE_FONT)
   },
   fontSizes: {
     h1: '2.25rem', // 36px
