@@ -128,6 +128,6 @@ export const EmptyState = styled.div`
 
   /* Tablet and above */
   @media (min-width: ${({ theme }) => theme.breakpoints.values.tablet}px) {
-    padding: ${({ theme }) => theme.spacing.scale['2xl']};
+    padding: ${({ theme }) => theme.spacing.scale.xl};
   }
 `;
