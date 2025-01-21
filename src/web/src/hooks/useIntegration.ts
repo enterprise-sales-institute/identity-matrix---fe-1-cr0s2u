@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'; // react-redux@8.x
 
 // Internal imports
 import integrationService from '../services/integration.service';
-import { Integration, IntegrationCreatePayload, IntegrationUpdatePayload } from '../types/integration.types';
+import { IntegrationCreatePayload, IntegrationUpdatePayload } from '../types/integration.types';
 import {
   setLoading,
   setIntegrations,
