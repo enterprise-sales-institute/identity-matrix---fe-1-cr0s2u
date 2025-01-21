@@ -1,6 +1,5 @@
 import styled from 'styled-components'; // v5.x
 import type { DefaultTheme } from 'styled-components'; // v5.x
-import type { Colors, Spacing, Breakpoints } from '../../../styles/theme.styles';
 
 /**
  * Status color mapping with WCAG 2.1 Level AA compliant colors
