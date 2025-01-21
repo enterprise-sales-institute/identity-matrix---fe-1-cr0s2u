@@ -97,6 +97,7 @@ export interface AuthState {
   loading: boolean;                 // Authentication operation status
   error: string | null;             // Authentication error message
   lastActivity: Date;               // Last user activity timestamp
+  sessionId: string | null;         // Current session identifier
 }
 
 /**
@@ -107,6 +108,16 @@ export interface AuthResponse {
   user: UserProfile;     // Authenticated user profile
   tokens: AuthTokens;    // Authentication tokens
   sessionId: string;     // Unique session identifier
+}
+
+/**
+ * Interface for authentication error handling
+ * @interface AuthError
+ */
+export interface AuthError {
+  code: string;          // Error code identifier
+  message: string;       // Human-readable error message
+  details?: unknown;     // Additional error details
 }
 
 /**
