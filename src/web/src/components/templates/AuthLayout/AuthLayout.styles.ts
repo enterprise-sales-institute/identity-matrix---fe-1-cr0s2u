@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { colors, spacing, breakpoints } from '../../../styles/variables.styles';
+import { colors, spacing, breakpoints, createSpacing } from '../../../styles/variables.styles';
 
 // Constants for layout measurements and spacing
-const CONTAINER_PADDING = spacing.baseUnit * 2;
+const CONTAINER_PADDING = createSpacing(2);
 const CONTENT_MAX_WIDTH = '480px';
 const LOGO_SIZE = '48px';
 
@@ -16,7 +16,7 @@ export const AuthLayoutContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${CONTAINER_PADDING}px;
+  padding: ${CONTAINER_PADDING};
   background-color: ${({ theme }) => theme.mode === 'dark' 
     ? colors.background.dark 
     : colors.background.light};
@@ -31,11 +31,11 @@ export const AuthLayoutContainer = styled.div`
 
   /* Responsive adjustments */
   ${breakpoints.mediaQueries.mobile} {
-    padding: ${CONTAINER_PADDING * 1.5}px;
+    padding: ${createSpacing(3)};
   }
 
   ${breakpoints.mediaQueries.tablet} {
-    padding: ${CONTAINER_PADDING * 2}px;
+    padding: ${createSpacing(4)};
   }
 `;
 
@@ -47,7 +47,7 @@ export const AuthLayoutContent = styled.main`
   width: 100%;
   max-width: ${CONTENT_MAX_WIDTH};
   margin: 0 auto;
-  padding: ${spacing.baseUnit * 3}px;
+  padding: ${createSpacing(3)};
   border-radius: 8px;
   background-color: ${({ theme }) => theme.mode === 'dark' 
     ? colors.inputBackground.dark 
@@ -61,7 +61,7 @@ export const AuthLayoutContent = styled.main`
 
   /* Responsive padding adjustments */
   ${breakpoints.mediaQueries.mobile} {
-    padding: ${spacing.baseUnit * 2}px;
+    padding: ${createSpacing(2)};
   }
 
   /* Animation for smooth transitions */
@@ -83,7 +83,7 @@ export const AuthLayoutContent = styled.main`
 export const AuthLayoutLogo = styled.div`
   width: ${LOGO_SIZE};
   height: ${LOGO_SIZE};
-  margin-bottom: ${spacing.baseUnit * 4}px;
+  margin-bottom: ${createSpacing(4)};
   
   /* Image optimization styles */
   img {
@@ -114,11 +114,11 @@ export const AuthLayoutLogo = styled.div`
 export const AuthLayoutForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: ${spacing.baseUnit * 2}px;
+  gap: ${createSpacing(2)};
 
   /* Ensure proper spacing between form elements */
   > * + * {
-    margin-top: ${spacing.baseUnit}px;
+    margin-top: ${spacing.baseUnit};
   }
 
   /* Focus management for form elements */
@@ -134,7 +134,7 @@ export const AuthLayoutForm = styled.form`
  */
 export const AuthLayoutText = styled.p`
   text-align: center;
-  margin-top: ${spacing.baseUnit * 2}px;
+  margin-top: ${createSpacing(2)};
   color: ${({ theme }) => theme.mode === 'dark' 
     ? colors.text.dark 
     : colors.text.light};
