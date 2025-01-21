@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom'; // v6.x
 import { NavigationItemContainer, NavigationLink } from './NavigationItem.styles';
 import Icon from '../../atoms/Icon/Icon';
-import { ThemeConfig } from '../../../types/theme.types';
 
 /**
  * Props interface for NavigationItem component with enhanced accessibility support
