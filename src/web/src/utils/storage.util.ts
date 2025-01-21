@@ -39,24 +39,28 @@ interface EncryptedData {
  * @throws {Error} If storage quota is exceeded or encryption fails
  */
 export function setItem<T>(key: string, value: T): void {
+  let ivTemp: any;
+  let jsonValueTemp: string;
+  let encryptedTemp: any;
+
   try {
     if (!key) throw new Error('Storage key is required');
     if (value === undefined) throw new Error('Value is required');
 
     // Generate random IV for encryption
-    const iv = lib.WordArray.random(16);
-    const jsonValue = JSON.stringify(value);
+    ivTemp = lib.WordArray.random(16);
+    jsonValueTemp = JSON.stringify(value);
 
     // Encrypt data with AES-256-CBC
-    const encrypted = AES.encrypt(jsonValue, ENCRYPTION_KEY, {
-      iv: iv,
+    encryptedTemp = AES.encrypt(jsonValueTemp, ENCRYPTION_KEY, {
+      iv: ivTemp,
       mode: mode.CBC,
       padding: pad.Pkcs7
     });
 
     const encryptedData: EncryptedData = {
-      data: encrypted.toString(),
-      iv: iv.toString(),
+      data: encryptedTemp.toString(),
+      iv: ivTemp.toString(),
       version: STORAGE_VERSION
     };
 
@@ -68,9 +72,9 @@ export function setItem<T>(key: string, value: T): void {
     throw error;
   } finally {
     // Clear sensitive data from memory
-    (iv as any) = null;
-    (jsonValue as any) = null;
-    (encrypted as any) = null;
+    ivTemp = null;
+    jsonValueTemp = null;
+    encryptedTemp = null;
   }
 }
 
@@ -82,6 +86,10 @@ export function setItem<T>(key: string, value: T): void {
  * @throws {Error} If decryption fails or data is invalid
  */
 export function getItem<T>(key: string): T | null {
+  let ivTemp: any;
+  let decryptedTemp: any;
+  let decryptedTextTemp: string;
+
   try {
     if (!key) throw new Error('Storage key is required');
 
@@ -93,25 +101,25 @@ export function getItem<T>(key: string): T | null {
       throw new Error('Storage version mismatch');
     }
 
-    const iv = enc.Hex.parse(encryptedData.iv);
-    const decrypted = AES.decrypt(encryptedData.data, ENCRYPTION_KEY, {
-      iv: iv,
+    ivTemp = enc.Hex.parse(encryptedData.iv);
+    decryptedTemp = AES.decrypt(encryptedData.data, ENCRYPTION_KEY, {
+      iv: ivTemp,
       mode: mode.CBC,
       padding: pad.Pkcs7
     });
 
-    const decryptedText = decrypted.toString(enc.Utf8);
-    if (!decryptedText) return null;
+    decryptedTextTemp = decryptedTemp.toString(enc.Utf8);
+    if (!decryptedTextTemp) return null;
 
-    return JSON.parse(decryptedText) as T;
+    return JSON.parse(decryptedTextTemp) as T;
   } catch (error) {
     console.error('Failed to retrieve stored item:', error);
     return null;
   } finally {
     // Clear sensitive data
-    (iv as any) = null;
-    (decrypted as any) = null;
-    (decryptedText as any) = null;
+    ivTemp = null;
+    decryptedTemp = null;
+    decryptedTextTemp = null;
   }
 }
 
