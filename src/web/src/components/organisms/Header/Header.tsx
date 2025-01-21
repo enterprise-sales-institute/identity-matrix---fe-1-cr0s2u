@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({
   // Hooks
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const { user, logout, loading } = useAuth();
+  const { logout, loading } = useAuth();
 
   /**
    * Handle theme toggle with error boundary
