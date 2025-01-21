@@ -42,35 +42,32 @@ export const enum ColorConstants {
 export const enum TypographyConstants {
   HEADING_FONT = 'Inter',
   BODY_FONT = 'Roboto',
-  CODE_FONT = 'Fira Code',
-  
-  // Font weights
-  FONT_WEIGHTS = {
-    regular: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700
-  },
-  
-  // Font sizes using rem units for accessibility
-  FONT_SIZES = {
-    xs: '0.75rem',    // 12px
-    sm: '0.875rem',   // 14px
-    base: '1rem',     // 16px
-    lg: '1.125rem',   // 18px
-    xl: '1.25rem',    // 20px
-    '2xl': '1.5rem',  // 24px
-    '3xl': '1.875rem',// 30px
-    '4xl': '2.25rem'  // 36px
-  },
-  
-  // Line heights for optimal readability
-  LINE_HEIGHTS = {
-    tight: 1.25,
-    base: 1.5,
-    relaxed: 1.75
-  }
+  CODE_FONT = 'Fira Code'
 }
+
+export const FONT_WEIGHTS = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700
+} as const;
+
+export const FONT_SIZES = {
+  xs: '0.75rem',    // 12px
+  sm: '0.875rem',   // 14px
+  base: '1rem',     // 16px
+  lg: '1.125rem',   // 18px
+  xl: '1.25rem',    // 20px
+  '2xl': '1.5rem',  // 24px
+  '3xl': '1.875rem',// 30px
+  '4xl': '2.25rem'  // 36px
+} as const;
+
+export const LINE_HEIGHTS = {
+  tight: 1.25,
+  base: 1.5,
+  relaxed: 1.75
+} as const;
 
 /**
  * Spacing and grid system constants
@@ -78,26 +75,24 @@ export const enum TypographyConstants {
  */
 export const enum SpacingConstants {
   BASE_UNIT = '8px',
-  GRID_COLUMNS = 12,
-  
-  // Spacing scale using rem units
-  SPACING_UNITS = {
-    xs: '0.25rem',  // 4px
-    sm: '0.5rem',   // 8px
-    md: '1rem',     // 16px
-    lg: '1.5rem',   // 24px
-    xl: '2rem',     // 32px
-    '2xl': '3rem'   // 48px
-  },
-  
-  // Container maximum widths
-  CONTAINER_WIDTHS = {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px'
-  }
+  GRID_COLUMNS = 12
 }
+
+export const SPACING_UNITS = {
+  xs: '0.25rem',  // 4px
+  sm: '0.5rem',   // 8px
+  md: '1rem',     // 16px
+  lg: '1.5rem',   // 24px
+  xl: '2rem',     // 32px
+  '2xl': '3rem'   // 48px
+} as const;
+
+export const CONTAINER_WIDTHS = {
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px'
+} as const;
 
 /**
  * Responsive breakpoint constants and media queries
@@ -106,12 +101,11 @@ export const enum SpacingConstants {
 export const enum BreakpointConstants {
   MOBILE = '320px',
   TABLET = '768px',
-  DESKTOP = '1024px',
-  
-  // Media query strings for responsive design
-  MEDIA_QUERIES = {
-    mobile: '@media (min-width: 320px)',
-    tablet: '@media (min-width: 768px)',
-    desktop: '@media (min-width: 1024px)'
-  }
+  DESKTOP = '1024px'
 }
+
+export const MEDIA_QUERIES = {
+  mobile: '@media (min-width: 320px)',
+  tablet: '@media (min-width: 768px)',
+  desktop: '@media (min-width: 1024px)'
+} as const;
