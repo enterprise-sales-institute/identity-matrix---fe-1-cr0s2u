@@ -81,6 +81,7 @@ export interface Spacing {
     md: string; // 1rem (16px)
     lg: string; // 1.5rem (24px)
     xl: string; // 2rem (32px)
+    '2xl': string; // 3rem (48px)
   };
 }
 
