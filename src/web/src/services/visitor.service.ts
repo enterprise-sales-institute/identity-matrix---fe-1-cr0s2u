@@ -59,6 +59,22 @@ class VisitorService {
   }
 
   /**
+   * Update visitor information
+   * @param visitor - Visitor object with updated data
+   */
+  public async updateVisitor(visitor: Visitor): Promise<Visitor> {
+    try {
+      const response = await this.apiInstance.put<Visitor>(
+        API_ENDPOINTS.VISITORS.BY_ID.replace(':id', visitor.id),
+        visitor
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Retrieve visitors with filtering, caching, and performance optimization
    * @param filter - Visitor filtering criteria
    * @param useCache - Whether to use cached data
