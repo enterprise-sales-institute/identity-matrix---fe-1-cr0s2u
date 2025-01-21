@@ -11,14 +11,12 @@ import { useDispatch, useSelector } from 'react-redux'; // react-redux@8.x
 import debounce from 'lodash/debounce'; // lodash@4.x
 
 // Internal imports
-import { teamService } from '../services/team.service';
+import TeamService from '../services/team.service';
 import { teamActions } from '../store/team/team.slice';
 import {
-  TeamMember,
   TeamInvitation,
   TeamMemberUpdate,
-  TeamRole,
-  TeamMemberStatus
+  TeamState
 } from '../types/team.types';
 
 // Constants
@@ -46,10 +44,10 @@ export const useTeam = () => {
   const dispatch = useDispatch();
 
   // Redux selectors
-  const members = useSelector((state: any) => state.team.members);
-  const loading = useSelector((state: any) => state.team.loading);
-  const error = useSelector((state: any) => state.team.error);
-  const validationErrors = useSelector((state: any) => state.team.validationErrors);
+  const members = useSelector((state: { team: TeamState }) => state.team.members);
+  const loading = useSelector((state: { team: TeamState }) => state.team.loading);
+  const error = useSelector((state: { team: TeamState }) => state.team.error);
+  const validationErrors = useSelector((state: { team: TeamState }) => state.team.validationErrors);
 
   /**
    * Fetch team members with error handling and retry logic
@@ -59,7 +57,7 @@ export const useTeam = () => {
     const fetchWithRetry = async (): Promise<void> => {
       try {
         dispatch(teamActions.setLoading(true));
-        const response = await teamService.getTeamMembers();
+        const response = await TeamService.getTeamMembers();
         dispatch(teamActions.setTeamMembers(response.data));
       } catch (error: any) {
         if (retryCount < MAX_RETRY_ATTEMPTS) {
@@ -67,9 +65,8 @@ export const useTeam = () => {
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
           return fetchWithRetry();
         }
-        dispatch(teamActions.setError({
-          code: 'FETCH_ERROR',
-          message: error.message
+        dispatch(teamActions.setValidationError({
+          general: error.message
         }));
       } finally {
         dispatch(teamActions.setLoading(false));
@@ -87,22 +84,14 @@ export const useTeam = () => {
       dispatch(teamActions.setInviting(true));
       
       // Validate role permissions
-      await teamService.validateTeamOperation('invite', invitation.role);
+      await TeamService.validateTeamOperation('invite', invitation.role);
       
-      const response = await teamService.inviteTeamMember(invitation);
+      const response = await TeamService.inviteTeamMember(invitation);
       dispatch(teamActions.addTeamMember(response));
       
-      // Log successful invitation
-      dispatch(teamActions.logTeamActivity({
-        action: 'INVITE',
-        targetEmail: invitation.email,
-        role: invitation.role
-      }));
     } catch (error: any) {
-      dispatch(teamActions.setError({
-        code: 'INVITE_ERROR',
-        message: error.message,
-        field: error.field
+      dispatch(teamActions.setValidationError({
+        invite: error.message
       }));
     } finally {
       dispatch(teamActions.setInviting(false));
@@ -121,23 +110,15 @@ export const useTeam = () => {
       
       // Validate role change permissions
       if (update.role) {
-        await teamService.validateTeamOperation('update', update.role);
+        await TeamService.validateTeamOperation('update', update.role);
       }
       
-      const response = await teamService.updateTeamMember(memberId, update);
+      const response = await TeamService.updateTeamMember(memberId, update);
       dispatch(teamActions.updateTeamMember(response));
       
-      // Log successful update
-      dispatch(teamActions.logTeamActivity({
-        action: 'UPDATE',
-        targetId: memberId,
-        changes: update
-      }));
     } catch (error: any) {
-      dispatch(teamActions.setError({
-        code: 'UPDATE_ERROR',
-        message: error.message,
-        field: error.field
+      dispatch(teamActions.setValidationError({
+        update: error.message
       }));
     } finally {
       dispatch(teamActions.setUpdating(false));
@@ -152,20 +133,14 @@ export const useTeam = () => {
       dispatch(teamActions.setUpdating(true));
       
       // Validate removal permissions
-      await teamService.validateTeamOperation('remove', memberId);
+      await TeamService.validateTeamOperation('remove', memberId);
       
-      await teamService.removeTeamMember(memberId);
+      await TeamService.removeTeamMember(memberId);
       dispatch(teamActions.removeTeamMember(memberId));
       
-      // Log successful removal
-      dispatch(teamActions.logTeamActivity({
-        action: 'REMOVE',
-        targetId: memberId
-      }));
     } catch (error: any) {
-      dispatch(teamActions.setError({
-        code: 'REMOVE_ERROR',
-        message: error.message
+      dispatch(teamActions.setValidationError({
+        remove: error.message
       }));
     } finally {
       dispatch(teamActions.setUpdating(false));
