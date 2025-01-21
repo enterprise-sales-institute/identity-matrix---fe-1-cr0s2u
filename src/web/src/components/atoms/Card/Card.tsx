@@ -6,7 +6,6 @@
 
 import React from 'react'; // v18.x
 import { CardContainer, CardHeader, CardContent, CardFooter } from './Card.styles';
-import type { ThemeConfig } from '../../../types/theme.types';
 
 /**
  * Props interface for the Card component
