@@ -42,7 +42,7 @@ class AuthService {
   private constructor() {
     // Generate unique encryption key for token storage
     this.encryptionKey = CryptoJS.lib.WordArray.random(256/8).toString();
-    this.initializeSession();
+    this.validateStoredSession();
   }
 
   /**
@@ -61,7 +61,7 @@ class AuthService {
   private initializeSession(): void {
     window.addEventListener('mousemove', () => this.updateLastActivity());
     window.addEventListener('keypress', () => this.updateLastActivity());
-    this.checkStoredSession();
+    this.validateStoredSession();
   }
 
   /**
@@ -145,24 +145,24 @@ class AuthService {
    */
   public async login(credentials: AuthCredentials): Promise<AuthResponse> {
     try {
-      const { verifier, challenge } = this.generatePKCEPair();
+      const pkce = this.generatePKCEPair();
       
       const response: AxiosResponse<AuthResponse> = await this.apiService.post(
         API_ENDPOINTS.AUTH.LOGIN,
         {
           ...credentials,
-          codeChallenge: challenge,
+          codeChallenge: pkce.challenge,
           codeChallengeMethod: 'S256'
         }
       );
 
-      const { user, tokens } = response.data;
+      const { tokens } = response.data;
       
       this.storeTokens(tokens);
       this.setupTokenRefresh(tokens);
       this.updateLastActivity();
       
-      ApiService.instance.setAuthToken(tokens.accessToken, tokens.refreshToken);
+      this.apiService.setAuthToken(tokens.accessToken, tokens.refreshToken);
       
       return response.data;
     } catch (error) {
@@ -175,24 +175,24 @@ class AuthService {
    */
   public async register(data: RegistrationData): Promise<AuthResponse> {
     try {
-      const { verifier, challenge } = this.generatePKCEPair();
+      const pkce = this.generatePKCEPair();
       
       const response: AxiosResponse<AuthResponse> = await this.apiService.post(
         API_ENDPOINTS.AUTH.REGISTER,
         {
           ...data,
-          codeChallenge: challenge,
+          codeChallenge: pkce.challenge,
           codeChallengeMethod: 'S256'
         }
       );
 
-      const { user, tokens } = response.data;
+      const { tokens } = response.data;
       
       this.storeTokens(tokens);
       this.setupTokenRefresh(tokens);
       this.updateLastActivity();
       
-      ApiService.instance.setAuthToken(tokens.accessToken, tokens.refreshToken);
+      this.apiService.setAuthToken(tokens.accessToken, tokens.refreshToken);
       
       return response.data;
     } catch (error) {
@@ -211,13 +211,13 @@ class AuthService {
       }
 
       const refreshToken = this.decrypt(encryptedRefreshToken);
-      const { verifier, challenge } = this.generatePKCEPair();
+      const pkce = this.generatePKCEPair();
 
       const response: AxiosResponse<AuthResponse> = await this.apiService.post(
         API_ENDPOINTS.AUTH.REFRESH,
         {
           refreshToken,
-          codeChallenge: challenge,
+          codeChallenge: pkce.challenge,
           codeChallengeMethod: 'S256'
         }
       );
@@ -227,7 +227,7 @@ class AuthService {
       this.storeTokens(tokens);
       this.setupTokenRefresh(tokens);
       
-      ApiService.instance.setAuthToken(tokens.accessToken, tokens.refreshToken);
+      this.apiService.setAuthToken(tokens.accessToken, tokens.refreshToken);
       
       return response.data;
     } catch (error) {
@@ -255,14 +255,14 @@ class AuthService {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       
-      ApiService.instance.removeAuthToken();
+      this.apiService.removeAuthToken();
     }
   }
 
   /**
    * Validate current session
    */
-  public async validateSession(): Promise<boolean> {
+  public async validateStoredSession(): Promise<boolean> {
     try {
       const encryptedTokens = localStorage.getItem(TOKEN_STORAGE_KEY);
       if (!encryptedTokens) {
