@@ -5,14 +5,14 @@
  */
 
 // External imports
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'; // axios@1.x
+import axios, { AxiosInstance, AxiosError } from 'axios'; // axios@1.x
 import axiosRetry from 'axios-retry'; // axios-retry@3.x
-import { generateChallenge, verifyChallenge } from 'pkce-challenge'; // pkce-challenge@2.x
+import { generateChallenge } from 'pkce-challenge'; // pkce-challenge@2.x
 
 // Internal imports
 import { API_CONFIG } from '../config/api.config';
 import { API_ENDPOINTS } from '../constants/api.constants';
-import { AuthResponse, AuthTokens, PKCEChallenge } from '../types/auth.types';
+import { AuthResponse, PKCEChallenge } from '../types/auth.types';
 
 // Constants
 const TOKEN_REFRESH_INTERVAL_MS = 300000; // 5 minutes
@@ -38,7 +38,6 @@ class ApiService {
   private refreshTokenTimeout?: NodeJS.Timeout;
   private currentRequestId: string = '';
   private requestTimestamps: Map<string, number> = new Map();
-  private pkceChallenge?: PKCEChallenge;
 
   private constructor() {
     // Initialize Axios instance with secure defaults
@@ -83,12 +82,12 @@ class ApiService {
         this.requestTimestamps.set(this.currentRequestId, Date.now());
 
         // Add security headers
-        config.headers = {
-          ...config.headers,
+        const headers = {
           'X-Request-ID': this.currentRequestId,
           'X-Content-Type-Options': 'nosniff',
           'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
         };
+        config.headers = { ...config.headers, ...headers };
 
         return config;
       },
@@ -102,7 +101,7 @@ class ApiService {
         this.requestTimestamps.delete(this.currentRequestId);
 
         // Validate response time
-        if (requestTime > API_CONFIG.timeout) {
+        if (requestTime > REQUEST_TIMEOUT_MS) {
           console.warn(`Request exceeded timeout threshold: ${requestTime}ms`);
         }
 
@@ -160,15 +159,14 @@ class ApiService {
    */
   private async refreshAuthToken(refreshToken: string): Promise<boolean> {
     try {
-      // Generate new PKCE challenge
-      const { code_challenge, code_verifier } = generateChallenge();
-      this.pkceChallenge = code_challenge;
+      const verifier = crypto.randomUUID();
+      const challenge = generateChallenge(verifier);
 
       const response = await this.axiosInstance.post<AuthResponse>(
         API_ENDPOINTS.AUTH.REFRESH,
         {
           refreshToken,
-          codeChallenge: code_challenge,
+          codeChallenge: challenge,
           codeChallengeMethod: 'S256'
         }
       );
