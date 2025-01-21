@@ -40,7 +40,7 @@ export class WebSocketService {
   private isConnected: boolean = false;
   private reconnectAttempts: number = 0;
   private connectionTimeout: NodeJS.Timeout | null = null;
-  private eventListeners: Map<string, Function[]>;
+  private eventListeners: Map<string, ((...args: any[]) => void)[]>;
   private batchedEvents: Map<string, any[]>;
   private batchTimeouts: Map<string, NodeJS.Timeout>;
 
@@ -298,7 +298,7 @@ export class WebSocketService {
 
     // Ping/Pong monitoring
     this.socket.on('pong', () => {
-      this.eventEmitter.emit('latency', this.socket?.conn.transport.pingTimeout);
+      this.eventEmitter.emit('latency', WEBSOCKET_CONFIG.options.pingTimeout);
     });
   }
 
