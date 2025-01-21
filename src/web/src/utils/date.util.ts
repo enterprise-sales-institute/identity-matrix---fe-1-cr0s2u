@@ -15,8 +15,6 @@ dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 
 // Global constants
-const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
-const DEFAULT_TIME_FORMAT = 'HH:mm:ss';
 const DEFAULT_DATETIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DEFAULT_TIMEZONE = 'UTC';
 const RELATIVE_TIME_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
