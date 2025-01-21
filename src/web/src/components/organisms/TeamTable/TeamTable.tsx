@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useVirtualizer } from 'react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 // Internal imports
 import {
@@ -33,6 +33,15 @@ interface TeamTableProps {
   onStatusChange: (memberId: string, status: TeamMemberStatus, audit: { initiator: string; reason: string }) => Promise<void>;
   onRemoveMember: (memberId: string, audit: { initiator: string; reason: string }) => Promise<void>;
   isMobile?: boolean;
+}
+
+interface VirtualRow {
+  index: number;
+  key: number;
+  size: number;
+  start: number;
+  end: number;
+  measureElement: (element: Element | null) => void;
 }
 
 /**
@@ -92,10 +101,11 @@ export const TeamTable: React.FC<TeamTableProps> = React.memo(({
       });
 
       await updateMember(member.id, { role: newRole });
+      clearError();
     } catch (error) {
       console.error('Role change failed:', error);
     }
-  }, [onRoleChange, updateMember, canModifyRole]);
+  }, [onRoleChange, updateMember, canModifyRole, clearError]);
 
   /**
    * Handle status change with audit logging
@@ -111,10 +121,11 @@ export const TeamTable: React.FC<TeamTableProps> = React.memo(({
       });
 
       await updateMember(member.id, { status: newStatus });
+      clearError();
     } catch (error) {
       console.error('Status change failed:', error);
     }
-  }, [onStatusChange, updateMember]);
+  }, [onStatusChange, updateMember, clearError]);
 
   /**
    * Handle member removal with security checks
@@ -131,10 +142,11 @@ export const TeamTable: React.FC<TeamTableProps> = React.memo(({
       });
 
       await removeMember(member.id);
+      clearError();
     } catch (error) {
       console.error('Member removal failed:', error);
     }
-  }, [onRemoveMember, removeMember, canModifyRole]);
+  }, [onRemoveMember, removeMember, canModifyRole, clearError]);
 
   /**
    * Render role selection with accessibility
@@ -168,15 +180,15 @@ export const TeamTable: React.FC<TeamTableProps> = React.memo(({
   ), []);
 
   /**
-   * Memoized table headers
+   * Memoized table headers with responsive design
    */
   const tableHeaders = useMemo(() => [
     { id: 'name', label: 'Name' },
-    { id: 'email', label: 'Email' },
+    { id: 'email', label: isMobile ? 'Email' : 'Email Address' },
     { id: 'role', label: 'Role' },
     { id: 'status', label: 'Status' },
     { id: 'actions', label: 'Actions' }
-  ], []);
+  ], [isMobile]);
 
   return (
     <TableContainer ref={tableRef} role="region" aria-label="Team Members">
@@ -191,7 +203,7 @@ export const TeamTable: React.FC<TeamTableProps> = React.memo(({
           </tr>
         </TableHeader>
         <tbody>
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          {rowVirtualizer.getVirtualItems().map((virtualRow: VirtualRow) => {
             const member = members[virtualRow.index];
             return (
               <TableRow
