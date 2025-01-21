@@ -24,18 +24,18 @@ interface PublicRouteProps {}
  */
 const PublicRoute: FC<PublicRouteProps> = memo(() => {
   // Get authentication state and location
-  const { isAuthenticated, isLoading, authError } = useAuth();
+  const { isAuthenticated, loading, error } = useAuth();
   const location = useLocation();
 
   // Monitor authentication state changes
   useEffect(() => {
-    if (authError) {
-      console.error('Authentication error in PublicRoute:', authError);
+    if (error) {
+      console.error('Authentication error in PublicRoute:', error);
     }
-  }, [authError]);
+  }, [error]);
 
   // Handle loading state
-  if (isLoading) {
+  if (loading) {
     // Return null during loading to prevent flash of incorrect content
     return null;
   }
