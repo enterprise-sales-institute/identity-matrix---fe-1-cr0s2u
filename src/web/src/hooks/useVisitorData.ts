@@ -30,7 +30,6 @@ import {
 
 // Constants for performance optimization
 const DEBOUNCE_DELAY = 300; // 300ms delay for filter updates
-const CACHE_DURATION = 60000; // 1 minute cache duration
 const BATCH_SIZE = 10; // Number of updates to batch
 
 /**
@@ -57,7 +56,7 @@ export const useVisitorData = (initialFilter?: VisitorFilter) => {
   });
 
   // WebSocket integration
-  const { subscribe, unsubscribe, connectionStatus } = useWebSocket();
+  const { subscribe, unsubscribe, isConnected } = useWebSocket();
 
   /**
    * Fetch visitors with caching and error handling
@@ -90,12 +89,7 @@ export const useVisitorData = (initialFilter?: VisitorFilter) => {
     try {
       dispatch(setLoading(true));
       const visitor = await visitorService.getVisitorById(visitorId);
-      const activities = await visitorService.getVisitorActivity(visitorId);
-      
-      dispatch(setSelectedVisitor({
-        ...visitor,
-        activities
-      }));
+      dispatch(setSelectedVisitor(visitor));
     } catch (error: any) {
       dispatch(setError(error.message));
       console.error('Error selecting visitor:', error);
@@ -176,7 +170,7 @@ export const useVisitorData = (initialFilter?: VisitorFilter) => {
     loading,
     error,
     total,
-    connectionStatus,
+    isConnected,
     fetchVisitors,
     selectVisitor,
     updateFilter,
