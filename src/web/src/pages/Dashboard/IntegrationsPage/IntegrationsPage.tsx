@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary'; // v4.0.0
 
 // Internal imports
-import DashboardLayout from '../../components/templates/DashboardLayout/DashboardLayout';
-import IntegrationGrid from '../../components/organisms/IntegrationGrid/IntegrationGrid';
+import DashboardLayout from '../../../components/templates/DashboardLayout/DashboardLayout';
+import IntegrationGrid from '../../../components/organisms/IntegrationGrid/IntegrationGrid';
 import { useIntegration } from '../../../hooks/useIntegration';
+import { useAuth } from '../../../hooks/useAuth';
 
 /**
  * IntegrationsPage component for managing CRM integrations
@@ -13,15 +14,16 @@ import { useIntegration } from '../../../hooks/useIntegration';
 const IntegrationsPage: React.FC = React.memo(() => {
   // Integration management hook
   const {
-    integrations,
     loading,
     error,
     fetchIntegrations,
     createNewIntegration,
-    updateExistingIntegration,
     deleteExistingIntegration,
     syncIntegrationData
   } = useIntegration();
+
+  // Auth hook for company ID
+  const { user } = useAuth();
 
   // Ref for tracking component mount state
   const isMounted = useRef(true);
@@ -45,8 +47,20 @@ const IntegrationsPage: React.FC = React.memo(() => {
   const handleConnect = useCallback(async (integrationId: string) => {
     try {
       await createNewIntegration({
-        id: integrationId,
-        status: 'ACTIVE'
+        companyId: user?.companyId || '',
+        type: 'SALESFORCE',
+        credentials: {
+          clientId: '',
+          clientSecret: '',
+          accessToken: '',
+          refreshToken: '',
+          tokenExpiry: new Date()
+        },
+        config: {
+          syncInterval: 3600,
+          fieldMappings: [],
+          customSettings: {}
+        }
       });
       if (statusRef.current) {
         statusRef.current.textContent = 'Integration connected successfully';
@@ -54,7 +68,7 @@ const IntegrationsPage: React.FC = React.memo(() => {
     } catch (error) {
       handleError(error as Error);
     }
-  }, [createNewIntegration, handleError]);
+  }, [createNewIntegration, handleError, user?.companyId]);
 
   /**
    * Disconnect integration handler with confirmation
@@ -93,7 +107,7 @@ const IntegrationsPage: React.FC = React.memo(() => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await fetchIntegrations();
+        await fetchIntegrations(user?.companyId || '');
       } catch (error) {
         handleError(error as Error);
       }
@@ -104,7 +118,7 @@ const IntegrationsPage: React.FC = React.memo(() => {
     return () => {
       isMounted.current = false;
     };
-  }, [fetchIntegrations, handleError]);
+  }, [fetchIntegrations, handleError, user?.companyId]);
 
   /**
    * Error boundary fallback component
@@ -121,7 +135,7 @@ const IntegrationsPage: React.FC = React.memo(() => {
     <DashboardLayout>
       <ErrorBoundary
         FallbackComponent={ErrorFallback}
-        onReset={() => fetchIntegrations()}
+        onReset={() => fetchIntegrations(user?.companyId || '')}
         onError={handleError}
       >
         <div
