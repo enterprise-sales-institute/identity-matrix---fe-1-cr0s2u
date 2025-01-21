@@ -41,12 +41,9 @@ interface PaginatedResponse<T> {
 export class TeamService {
   private readonly apiInstance = ApiService.instance;
   private readonly requestTimeout: number;
-  private readonly retryAttempts: number;
-  private readonly endpoints = API_ENDPOINTS.TEAM;
 
-  constructor(timeout: number = 5000, retries: number = 3) {
+  constructor(timeout: number = 5000) {
     this.requestTimeout = timeout;
-    this.retryAttempts = retries;
   }
 
   /**
@@ -236,6 +233,8 @@ export class TeamService {
     const errorMessage = error.response?.data?.message || error.message;
     throw new Error(`${context}: ${errorMessage}`);
   }
+
+  private readonly endpoints = API_ENDPOINTS.TEAM;
 }
 
 // Export singleton instance
