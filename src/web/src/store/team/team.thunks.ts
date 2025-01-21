@@ -12,13 +12,13 @@ import { UUID } from 'crypto';
 // Internal imports
 import { teamActions } from './team.slice';
 import TeamService from '../../services/team.service';
-import { TeamTypes } from '../../types/team.types';
+import { TeamMember, TeamMemberCreate, TeamMemberUpdate, TeamMemberStatus } from '../../types/team.types';
 
 /**
  * Fetch team members with pagination and caching
  */
 export const fetchTeamMembers = createAsyncThunk<
-  TeamTypes.TeamMember[],
+  TeamMember[],
   { companyId: UUID; page?: number; limit?: number },
   { rejectValue: string }
 >(
@@ -26,7 +26,7 @@ export const fetchTeamMembers = createAsyncThunk<
   async ({ companyId, page = 1, limit = 10 }, { dispatch, rejectWithValue }) => {
     try {
       dispatch(teamActions.setLoading(true));
-      dispatch(teamActions.clearError());
+      dispatch(teamActions.clearErrors());
 
       const response = await TeamService.getTeamMembers(companyId, {
         page,
@@ -38,7 +38,7 @@ export const fetchTeamMembers = createAsyncThunk<
       dispatch(teamActions.setTeamMembers(response.data));
       return response.data;
     } catch (error: any) {
-      dispatch(teamActions.setError(error.message));
+      dispatch(teamActions.setValidationError({ general: error.message }));
       return rejectWithValue(error.message);
     } finally {
       dispatch(teamActions.setLoading(false));
@@ -50,28 +50,29 @@ export const fetchTeamMembers = createAsyncThunk<
  * Invite new team member with validation
  */
 export const inviteTeamMember = createAsyncThunk<
-  TeamTypes.TeamMember,
-  TeamTypes.TeamMemberCreate,
+  TeamMember,
+  TeamMemberCreate,
   { rejectValue: string }
 >(
   'team/inviteTeamMember',
   async (memberData, { dispatch, rejectWithValue }) => {
     try {
       dispatch(teamActions.setLoading(true));
-      dispatch(teamActions.clearError());
+      dispatch(teamActions.clearErrors());
 
       const invitation = await TeamService.inviteTeamMember(memberData);
       
       // Convert invitation to team member format
-      const newMember: TeamTypes.TeamMember = {
+      const newMember: TeamMember = {
         id: invitation.id,
         userId: invitation.id, // Temporary ID until user accepts
         companyId: memberData.companyId,
         role: memberData.role,
-        status: TeamTypes.TeamMemberStatus.PENDING,
+        status: TeamMemberStatus.PENDING,
         email: memberData.email,
         name: memberData.email.split('@')[0], // Temporary name
         invitedAt: new Date(),
+        joinedAt: null, // Will be set when user accepts invitation
         createdAt: new Date(),
         updatedAt: new Date(),
         lastActiveAt: new Date(),
@@ -85,7 +86,7 @@ export const inviteTeamMember = createAsyncThunk<
       dispatch(teamActions.addTeamMember(newMember));
       return newMember;
     } catch (error: any) {
-      dispatch(teamActions.setError(error.message));
+      dispatch(teamActions.setValidationError({ general: error.message }));
       return rejectWithValue(error.message);
     } finally {
       dispatch(teamActions.setLoading(false));
@@ -97,21 +98,21 @@ export const inviteTeamMember = createAsyncThunk<
  * Update team member with role validation
  */
 export const updateTeamMember = createAsyncThunk<
-  TeamTypes.TeamMember,
-  { memberId: UUID; updateData: TeamTypes.TeamMemberUpdate },
+  TeamMember,
+  { memberId: UUID; updateData: TeamMemberUpdate },
   { rejectValue: string }
 >(
   'team/updateTeamMember',
   async ({ memberId, updateData }, { dispatch, rejectWithValue }) => {
     try {
       dispatch(teamActions.setLoading(true));
-      dispatch(teamActions.clearError());
+      dispatch(teamActions.clearErrors());
 
       const updatedMember = await TeamService.updateTeamMember(memberId, updateData);
       dispatch(teamActions.updateTeamMember(updatedMember));
       return updatedMember;
     } catch (error: any) {
-      dispatch(teamActions.setError(error.message));
+      dispatch(teamActions.setValidationError({ general: error.message }));
       return rejectWithValue(error.message);
     } finally {
       dispatch(teamActions.setLoading(false));
@@ -131,12 +132,12 @@ export const removeTeamMember = createAsyncThunk<
   async (memberId, { dispatch, rejectWithValue }) => {
     try {
       dispatch(teamActions.setLoading(true));
-      dispatch(teamActions.clearError());
+      dispatch(teamActions.clearErrors());
 
       await TeamService.removeTeamMember(memberId);
       dispatch(teamActions.removeTeamMember(memberId));
     } catch (error: any) {
-      dispatch(teamActions.setError(error.message));
+      dispatch(teamActions.setValidationError({ general: error.message }));
       return rejectWithValue(error.message);
     } finally {
       dispatch(teamActions.setLoading(false));
@@ -148,15 +149,15 @@ export const removeTeamMember = createAsyncThunk<
  * Bulk invite team members with validation
  */
 export const bulkInviteTeamMembers = createAsyncThunk<
-  TeamTypes.TeamMember[],
-  TeamTypes.TeamMemberCreate[],
+  TeamMember[],
+  TeamMemberCreate[],
   { rejectValue: string }
 >(
   'team/bulkInviteTeamMembers',
   async (invitations, { dispatch, rejectWithValue }) => {
     try {
       dispatch(teamActions.setLoading(true));
-      dispatch(teamActions.clearError());
+      dispatch(teamActions.clearErrors());
 
       const response = await TeamService.bulkInviteMembers(invitations);
       
@@ -166,10 +167,11 @@ export const bulkInviteTeamMembers = createAsyncThunk<
         userId: invitation.id,
         companyId: invitation.companyId,
         role: invitation.role,
-        status: TeamTypes.TeamMemberStatus.PENDING,
+        status: TeamMemberStatus.PENDING,
         email: invitation.email,
         name: invitation.email.split('@')[0],
         invitedAt: invitation.invitedAt,
+        joinedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         lastActiveAt: new Date(),
@@ -183,7 +185,7 @@ export const bulkInviteTeamMembers = createAsyncThunk<
       newMembers.forEach(member => dispatch(teamActions.addTeamMember(member)));
       return newMembers;
     } catch (error: any) {
-      dispatch(teamActions.setError(error.message));
+      dispatch(teamActions.setValidationError({ general: error.message }));
       return rejectWithValue(error.message);
     } finally {
       dispatch(teamActions.setLoading(false));
