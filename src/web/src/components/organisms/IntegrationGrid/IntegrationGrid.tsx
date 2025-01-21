@@ -1,17 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary'; // v4.x
-import { useVirtualizer } from 'react-virtual'; // v2.x
+import { useVirtualizer } from '@tanstack/react-virtual'; // v2.x
 
 import {
-  GridContainer,
-  LoadingOverlay,
-  ErrorMessage,
-  RetryButton
+  GridContainer
 } from './IntegrationGrid.styles';
 import { IntegrationCard } from '../../molecules/IntegrationCard/IntegrationCard';
 import { useIntegration } from '../../../hooks/useIntegration';
 import { useTheme } from '../../../hooks/useTheme';
-import { Integration, IntegrationStatus } from '../../../types/integration.types';
+import { IntegrationStatus } from '../../../types/integration.types';
 
 interface IntegrationGridProps {
   /** Optional class name for styling */
@@ -31,16 +28,13 @@ export const IntegrationGrid = React.memo<IntegrationGridProps>(({
   onError,
   retryInterval = 30000
 }) => {
-  // Theme and integration hooks
   const { theme } = useTheme();
   const {
     integrations,
     loading,
     error,
     fetchIntegrations,
-    createNewIntegration,
     updateExistingIntegration,
-    deleteExistingIntegration,
     syncIntegrationData
   } = useIntegration();
 
@@ -108,13 +102,13 @@ export const IntegrationGrid = React.memo<IntegrationGridProps>(({
 
   // Error fallback component
   const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-    <ErrorMessage role="alert" aria-live="assertive">
+    <div role="alert" aria-live="assertive" className="error-message">
       <h3>Something went wrong</h3>
       <p>{error.message}</p>
-      <RetryButton onClick={resetErrorBoundary}>
+      <button onClick={resetErrorBoundary} className="retry-button">
         Try again
-      </RetryButton>
-    </ErrorMessage>
+      </button>
+    </div>
   );
 
   return (
@@ -132,19 +126,20 @@ export const IntegrationGrid = React.memo<IntegrationGridProps>(({
         data-testid="integration-grid"
       >
         {loading && (
-          <LoadingOverlay
+          <div
             aria-hidden="true"
             data-testid="loading-overlay"
+            className="loading-overlay"
           />
         )}
 
         {error && (
-          <ErrorMessage role="alert" aria-live="polite">
+          <div role="alert" aria-live="polite" className="error-message">
             {error.message}
-            <RetryButton onClick={() => fetchIntegrations('', true)}>
+            <button onClick={() => fetchIntegrations('', true)} className="retry-button">
               Retry
-            </RetryButton>
-          </ErrorMessage>
+            </button>
+          </div>
         )}
 
         <div
