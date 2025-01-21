@@ -12,8 +12,7 @@ export const defaultThemeConfig: ThemeConfig = {
     primary: {
       main: '#813efb',
       hover: '#9665fb',
-      active: '#6a32d1',
-      focus: '#813efb40'
+      active: '#6a32d1'
     },
     background: {
       main: '#ffffff',
@@ -102,6 +101,11 @@ export function getThemeConfig(mode: ThemeConstants): ThemeConfig {
   const darkTheme: Partial<ThemeConfig> = {
     mode: ThemeConstants.THEME_DARK,
     colors: {
+      primary: {
+        main: '#813efb',
+        hover: '#9665fb',
+        active: '#6a32d1'
+      },
       background: {
         main: '#1a1a1a',
         paper: '#2d2d2d',
