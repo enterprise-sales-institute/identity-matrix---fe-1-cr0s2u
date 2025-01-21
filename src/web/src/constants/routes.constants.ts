@@ -49,7 +49,7 @@ export type ProtectedRoutes = typeof PROTECTED_ROUTES;
  * @returns {boolean} True if route is public
  */
 export const isPublicRoute = (route: string): route is PublicRoutes[keyof PublicRoutes] => {
-  return Object.values(PUBLIC_ROUTES).includes(route);
+  return (Object.values(PUBLIC_ROUTES) as string[]).includes(route);
 };
 
 /**
@@ -58,5 +58,5 @@ export const isPublicRoute = (route: string): route is PublicRoutes[keyof Public
  * @returns {boolean} True if route is protected
  */
 export const isProtectedRoute = (route: string): route is ProtectedRoutes[keyof ProtectedRoutes] => {
-  return Object.values(PROTECTED_ROUTES).includes(route);
+  return (Object.values(PROTECTED_ROUTES) as string[]).includes(route);
 };
