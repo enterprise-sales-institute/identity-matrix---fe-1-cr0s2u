@@ -18,7 +18,6 @@ import {
 // Internal imports
 import { useAuth } from '../hooks/useAuth';
 import { 
-  AuthState, 
   UserProfile, 
   AuthError 
 } from '../types/auth.types';
