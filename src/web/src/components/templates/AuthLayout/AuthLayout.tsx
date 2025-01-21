@@ -8,9 +8,24 @@ import {
 } from './AuthLayout.styles';
 import { useTheme } from '../../../hooks/useTheme';
 
-// Lazy load logos for better performance
-const LogoDark = lazy(() => import('../../../assets/images/logo-dark.svg'));
-const LogoLight = lazy(() => import('../../../assets/images/logo-light.svg'));
+// Lazy load logos with proper type assertions for SVG components
+const LogoDark = lazy(() => 
+  import('../../../assets/images/logo-dark.svg').then(module => ({
+    default: (props: React.SVGProps<SVGSVGElement>) => React.createElement('img', {
+      src: module.default,
+      ...props
+    })
+  }))
+);
+
+const LogoLight = lazy(() => 
+  import('../../../assets/images/logo-light.svg').then(module => ({
+    default: (props: React.SVGProps<SVGSVGElement>) => React.createElement('img', {
+      src: module.default,
+      ...props
+    })
+  }))
+);
 
 // Constants for accessibility and testing
 const LOGO_ALT_TEXT = 'Identity Matrix';
