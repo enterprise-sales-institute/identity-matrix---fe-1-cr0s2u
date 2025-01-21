@@ -4,7 +4,7 @@ import { ThemeConstants } from '../constants/theme.constants';
  * Type-safe theme mode definition
  * @version 1.0.0
  */
-export type ThemeMode = typeof ThemeConstants.THEME_DARK | typeof ThemeConstants.THEME_LIGHT;
+export type ThemeMode = 'dark' | 'light';
 
 /**
  * Color scheme interface with WCAG 2.1 Level AA compliant color combinations
