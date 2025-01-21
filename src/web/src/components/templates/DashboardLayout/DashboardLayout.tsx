@@ -83,7 +83,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(({
         {/* Header with theme-aware styling */}
         <Header
           className="dashboard-header"
-          onMenuToggle={handleSidebarToggle}
           data-testid="dashboard-header"
         />
 
@@ -92,6 +91,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(({
           role="navigation"
           aria-label="Main navigation"
           data-testid="dashboard-sidebar"
+          isCollapsed={isSidebarCollapsed}
         >
           <Sidebar
             className="dashboard-sidebar"
