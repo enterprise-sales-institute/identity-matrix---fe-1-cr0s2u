@@ -44,13 +44,11 @@ interface SyncResult {
  */
 export class IntegrationService {
   private readonly apiInstance = ApiService.instance;
-  private readonly maxRetries: number;
   private readonly syncStatus: Map<string, IntegrationStatus>;
   private readonly cache: Map<string, { data: Integration[]; timestamp: number }>;
   private readonly CACHE_DURATION = 300000; // 5 minutes
 
-  constructor(maxRetries: number = 3) {
-    this.maxRetries = maxRetries;
+  constructor() {
     this.syncStatus = new Map();
     this.cache = new Map();
   }
