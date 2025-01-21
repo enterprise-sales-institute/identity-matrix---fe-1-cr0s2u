@@ -1,6 +1,5 @@
 import styled from 'styled-components'; // v5.x
 import { colors, spacing, breakpoints } from '../../../styles/variables.styles';
-import { lightTheme, darkTheme } from '../../../styles/theme.styles';
 
 // Constants for consistent spacing and styling
 const MOBILE_PADDING = 'var(--im-spacing-base, 8px)';
